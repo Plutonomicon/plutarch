@@ -29,6 +29,7 @@ module Plutarch (
   printScript,
   (#$),
   (#),
+  (#.),
   pinl,
   PCon (..),
   PMatch (..),
@@ -84,6 +85,17 @@ infixl 8 #
 (#$) = papp
 
 infixr 0 #$
+
+{- |
+  Composition of Plutarch level functions
+
+  >>> f #. g #$ x
+  f (g x)
+-}
+(#.) :: Term s (b :--> c) -> Term s (a :--> b) -> Term s (a :--> c)
+(#.) bc ab = plam $ \a -> bc #$ ab # a
+
+infixr 7 #.
 
 {- $plam
  Lambda abstraction.
@@ -234,3 +246,4 @@ pfix = phoistAcyclic $
     plam $ \f ->
       (plam $ \(x :: Term s POpaque) -> f # (plam $ \(v :: Term s POpaque) -> (punsafeCoerce x) # x # v))
         # punsafeCoerce (plam $ \(x :: Term s POpaque) -> f # (plam $ \(v :: Term s POpaque) -> (punsafeCoerce x) # x # v))
+
