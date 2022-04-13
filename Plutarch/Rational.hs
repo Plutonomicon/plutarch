@@ -3,10 +3,11 @@ module Plutarch.Rational (
   preduce,
   pnumerator,
   pdenominator,
-  pfromInteger,
+  pratFromInt,
   pround,
   ptruncate,
   pproperFraction,
+  (#%),
 ) where
 
 import Data.Ratio (denominator, numerator)
@@ -35,7 +36,13 @@ import Plutarch.Builtin (
   pasList,
   pforgetData,
  )
-import Plutarch.Integer (PInteger, PIntegral (pdiv, pmod))
+import Plutarch.Integer (
+  PInteger,
+  pdiv,
+  pmod,
+  pquot,
+  prem,
+ )
 import Plutarch.List (PListLike (pcons, phead, pnil, ptail), pmap)
 import Plutarch.Pair (PPair (..))
 import Plutarch.Show (PShow (pshow'), pshow)
@@ -56,12 +63,20 @@ instance PShow PRational where
           pshow x <> "/" <> pshow y
 
 instance PIsData PRational where
-  pfromData x' = phoistAcyclic (plam $ \x -> pListToRat #$ pmap # pasInt #$ pasList # pforgetData x) # x'
+  pfromData x' =
+    phoistAcyclic
+      ( plam $ \x ->
+          pListToRat #$ pmap # pasInt #$ pasList # pforgetData x
+      )
+      # x'
   pdata x' =
     phoistAcyclic
       ( plam $ \x ->
-          (punsafeCoerce :: Term _ (PAsData (PBuiltinList (PAsData PInteger))) -> Term _ (PAsData PRational)) $
-            pdata $ pRatToList # x
+          ( punsafeCoerce ::
+              Term _ (PAsData (PBuiltinList (PAsData PInteger))) ->
+              Term _ (PAsData PRational)
+          )
+            $ pdata $ pRatToList # x
       )
       # x'
 
@@ -244,8 +259,15 @@ pnumerator = phoistAcyclic $ plam $ \x -> pmatch x $ \(PRational n _) -> n
 pdenominator :: Term s (PRational :--> PInteger)
 pdenominator = phoistAcyclic $ plam $ \x -> pmatch x $ \(PRational _ d) -> d
 
-pfromInteger :: Term s (PInteger :--> PRational)
-pfromInteger = phoistAcyclic $ plam $ \n -> pcon $ PRational n 1
+pratFromInt :: Term s (PInteger :--> PRational)
+pratFromInt = phoistAcyclic $ plam $ \n -> pcon $ PRational n 1
+
+pratFromIntsUnsafe :: Term s (PInteger :--> PInteger :--> PRational)
+pratFromIntsUnsafe =
+  phoistAcyclic $ plam $ \n d -> pcon $ PRational n d
+
+(#%) :: Term s PInteger -> Term s PInteger -> Term s PRational
+n #% d = pratFromIntsUnsafe # n # d
 
 pround :: Term s (PRational :--> PInteger)
 pround = phoistAcyclic $
@@ -266,15 +288,14 @@ pround = phoistAcyclic $
 ptruncate :: Term s (PRational :--> PInteger)
 ptruncate = phoistAcyclic $
   plam $ \x ->
-    pmatch x $ \(PRational a b) ->
-      plet (pdiv # a # b) $ \q ->
-        pif
-          (0 #<= a)
-          q
-          (q + pif (pmod # a # b #== 0) 0 1)
+    pmatch x $ \(PRational a b) -> pquot # a # b
 
 pproperFraction :: Term s (PRational :--> PPair PInteger PRational)
-pproperFraction = phoistAcyclic $
-  plam $ \x ->
-    plet (ptruncate # x) $ \q ->
-      pcon $ PPair q (x - pfromInteger # q)
+pproperFraction =
+  phoistAcyclic $
+    plam $ \x ->
+      pmatch x $ \(PRational n d) ->
+        pcon $
+          PPair
+            (pquot # n # d)
+            (pcon $ PRational (prem # n # d) d)

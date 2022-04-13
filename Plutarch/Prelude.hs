@@ -29,10 +29,10 @@ module Plutarch.Prelude (
   PIntegral (pdiv, pmod, pquot, prem),
 
   -- * Rational numbers and utilities
-  PRational,
+  PRational (PRational),
   pnumerator,
   pdenominator,
-  pfromInteger,
+  pratFromInt,
   pround,
 
   -- * Booleans and boolean functions

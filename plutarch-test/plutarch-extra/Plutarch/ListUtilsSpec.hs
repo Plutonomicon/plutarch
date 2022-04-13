@@ -1,6 +1,6 @@
 module Plutarch.ListUtilsSpec (spec) where
 
-import Plutarch.ListUtils (pcheckSorted, preverse)
+import Plutarch.Extra.ListUtils (pcheckSorted, preverse)
 import Plutarch.Prelude
 
 import Hedgehog (Property)

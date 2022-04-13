@@ -296,7 +296,7 @@ instance PIsData PBool where
       toData :: Term s PBool -> Term s (PAsData PBool)
       toData b =
         punsafeBuiltin PLC.ConstrData
-          # (pif' # b # 1 # (0 :: Term s PInteger))
+          # (pif' # b # 1 #$ 0 :: Term _ PInteger)
           # nil
 
       nil :: Term s (PBuiltinList PData)
