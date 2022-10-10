@@ -415,7 +415,7 @@ punionWith = phoistAcyclic $
 
 data MapUnionCarrier k v s = MapUnionCarrier
   { merge :: Term s (PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v)
-  , mergeInsert :: Term s (PBuiltinPair (PAsData k) (PAsData v) :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v)
+  , mergeInsert :: Term s (PBuiltinPair (PAsData k) (PAsData v) :--> PBuiltinPair (PAsData k) (PAsData v) :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v)
   }
   deriving stock (Generic)
   deriving anyclass (PlutusType)
@@ -429,33 +429,37 @@ mapUnionCarrier = phoistAcyclic $ plam \combine self ->
         MapUnionCarrier
           { merge = plam $ \xs ys -> pmatch xs $ \case
               PNil -> ys
-              PCons x xs' -> mergeInsert # x # xs' # ys
-          , mergeInsert = plam $ \x xs ys ->
-              pmatch ys $ \case
-                PNil -> pcons # x # xs
-                PCons y1 ys' ->
-                  plet y1 $ \y ->
-                    plet (pfstBuiltin # x) $ \xk ->
-                      plet (pfstBuiltin # y) $ \yk ->
-                        pif
-                          (xk #== yk)
-                          ( pcons
-                              # (ppairDataBuiltin # xk #$ combine # (psndBuiltin # x) # (psndBuiltin # y))
-                              #$ merge
-                              # xs
-                              # ys'
-                          )
-                          ( pif
-                              (pfromData xk #< pfromData yk)
-                              ( pcons
-                                  # x
-                                  # (mergeInsert # y # ys' # xs)
+              PCons x xs' -> pmatch ys $ \case
+                PNil -> xs
+                PCons y ys' -> mergeInsert # x # y # xs' # ys'
+          , mergeInsert = plam $ \x y xs ys ->
+              plet (pfstBuiltin # x) $ \xk ->
+                plet (pfstBuiltin # y) $ \yk ->
+                  pif
+                    (xk #== yk)
+                    ( pcons
+                        # (ppairDataBuiltin # xk #$ combine # (psndBuiltin # x) # (psndBuiltin # y))
+                        #$ merge
+                        # xs
+                        # ys
+                    )
+                    ( pif
+                        (pfromData xk #< pfromData yk)
+                        ( pcons
+                            # x
+                            # ( pmatch xs $ \case
+                                  PNil -> pcons # y # ys
+                                  PCons x' xs' -> mergeInsert # x' # y # xs' # ys
                               )
-                              ( pcons
-                                  # y
-                                  # (mergeInsert # x # xs # ys')
+                        )
+                        ( pcons
+                            # y
+                            # ( pmatch ys $ \case
+                                  PNil -> pcons # x # xs
+                                  PCons y' ys' -> mergeInsert # x # y' # xs # ys'
                               )
-                          )
+                        )
+                    )
           }
 
 mapUnion :: forall k v s. (POrd k, PIsData k) => Term s ((PAsData v :--> PAsData v :--> PAsData v) :--> MapUnionCarrier k v)
