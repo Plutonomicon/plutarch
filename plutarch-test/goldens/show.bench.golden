@@ -35,4 +35,4 @@ pshowAndErr.nil {"exBudgetCPU":100,"exBudgetMemory":100,"scriptSizeBytes":21}
 pshowAndErr.1,2,3 {"exBudgetCPU":100,"exBudgetMemory":100,"scriptSizeBytes":24}
 pair.int-str {"exBudgetCPU":34865639,"exBudgetMemory":80705,"scriptSizeBytes":454}
 pair.int-list {"exBudgetCPU":42325700,"exBudgetMemory":93314,"scriptSizeBytes":434}
-rational.1/2 {"exBudgetCPU":24862351,"exBudgetMemory":59194,"scriptSizeBytes":568}
+rational.1/2 {"exBudgetCPU":24862351,"exBudgetMemory":59194,"scriptSizeBytes":577}

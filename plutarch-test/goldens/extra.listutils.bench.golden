@@ -2,3 +2,14 @@ reverse.reverse_[1..5] {"exBudgetCPU":5865100,"exBudgetMemory":25600,"scriptSize
 isSorted.[1..10] {"exBudgetCPU":16166677,"exBudgetMemory":59218,"scriptSizeBytes":115}
 isSorted.reverse_[1..10] {"exBudgetCPU":3379609,"exBudgetMemory":13203,"scriptSizeBytes":126}
 isSorted.reverse_[] {"exBudgetCPU":621100,"exBudgetMemory":2800,"scriptSizeBytes":56}
+pmapMaybe.mapMaybe_[1..5] {"exBudgetCPU":6141100,"exBudgetMemory":26800,"scriptSizeBytes":90}
+pmapMaybe.mapMaybe_[] {"exBudgetCPU":552100,"exBudgetMemory":2500,"scriptSizeBytes":62}
+pmapMaybe.mapMaybe_[1..5]_Nothing {"exBudgetCPU":6235033,"exBudgetMemory":26301,"scriptSizeBytes":118}
+preplicate.preplicate_5_0 {"exBudgetCPU":14913020,"exBudgetMemory":41245,"scriptSizeBytes":94}
+preplicate.preplicate_0_0 {"exBudgetCPU":2073340,"exBudgetMemory":6235,"scriptSizeBytes":94}
+pfindJust.pfindJust_2_[1..10] {"exBudgetCPU":5709488,"exBudgetMemory":20607,"scriptSizeBytes":161}
+pfindJust.pfindJust_20_[1..10] {"exBudgetCPU":16441990,"exBudgetMemory":59020,"scriptSizeBytes":149}
+pfindJust.pfindJust_[] {"exBudgetCPU":1279454,"exBudgetMemory":4932,"scriptSizeBytes":87}
+plookupAssoc.plookupAssoc_3_[(1..10, 1..10)] {"exBudgetCPU":9702500,"exBudgetMemory":37607,"scriptSizeBytes":291}
+plookupAssoc.plookupAssoc_20_[(1..10, 1..10)] {"exBudgetCPU":21041990,"exBudgetMemory":79020,"scriptSizeBytes":287}
+plookupAssoc.plookupAssoc_[] {"exBudgetCPU":1518100,"exBudgetMemory":6700,"scriptSizeBytes":127}
