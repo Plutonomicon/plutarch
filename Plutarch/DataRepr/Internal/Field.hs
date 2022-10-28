@@ -270,7 +270,7 @@ pfield ::
   , a ~ PUnLabel (IndexList n as)
   , PFromDataable a b
   ) =>
-  Term s (p :--> b)
+  Term s (p #-> b)
 pfield =
   let _ = witness (Proxy @(n ~ PLabelIndex name as))
    in plam $ \i ->

@@ -16,30 +16,28 @@ import Plutarch.Lift (
  )
 import Plutarch.Show (PShow (pshow'))
 
-data PUnit s = PUnit
-
 instance PUnsafeLiftDecl PUnit where type PLifted PUnit = ()
 deriving via (DerivePConstantDirect () PUnit) instance PConstantDecl ()
 
-instance PlutusType PUnit where
-  type PInner PUnit = PUnit
-  pcon' PUnit = pconstant ()
-  pmatch' x f = plet x \_ -> f PUnit
+-- instance PlutusType PUnit where
+--   type PInner PUnit = PUnit
+--   pcon' PUnit = pconstant ()
+--   pmatch' x f = plet x \_ -> f PUnit
 
-instance PEq PUnit where
-  x #== y = plet x \_ -> plet y \_ -> pcon PTrue
+-- instance PEq PUnit where
+--   x #== y = plet x \_ -> plet y \_ -> pcon PTrue
 
-instance PPartialOrd PUnit where
-  x #<= y = plet x \_ -> plet y \_ -> pcon PTrue
-  x #< y = plet x \_ -> plet y \_ -> pcon PFalse
+-- instance PPartialOrd PUnit where
+--   x #<= y = plet x \_ -> plet y \_ -> pcon PTrue
+--   x #< y = plet x \_ -> plet y \_ -> pcon PFalse
 
-instance POrd PUnit
+-- instance POrd PUnit
 
-instance Semigroup (Term s PUnit) where
-  x <> y = plet x \_ -> plet y \_ -> pcon PUnit
+-- instance Semigroup (Term edsl PUnit) where
+--   x <> y = plet x \_ -> plet y \_ -> pcon PUnit
 
-instance Monoid (Term s PUnit) where
-  mempty = pcon PUnit
+-- instance Monoid (Term s PUnit) where
+--   mempty = pcon PUnit
 
-instance PShow PUnit where
-  pshow' _ x = plet x \_ -> "()"
+-- instance PShow PUnit where
+--   pshow' _ x = plet x \_ -> "()"

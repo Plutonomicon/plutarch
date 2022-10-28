@@ -77,7 +77,7 @@ import Plutarch (
   pto,
   (#),
   (#$),
-  type (:-->),
+  type (#->),
  )
 import Plutarch.Bool (PBool, PEq, POrd, PPartialOrd, pif, (#<), (#<=), (#==))
 import Plutarch.Builtin (
@@ -158,7 +158,7 @@ instance SListI l => PlutusType (PDataRecord l) where
   pcon' :: PDataRecord l s -> Term s (PBuiltinList PData)
   pcon' (PDCons x xs) = pcons # pforgetData x # pto xs
   pcon' PDNil = pcon' PDNil
-  pmatch' :: Term s (PBuiltinList PData) -> (PDataRecord l s -> Term s b) -> Term s b
+  pmatch'PPlutus' s => Term s (PBuiltinList PData) -> (PDataRecord l s -> Term s b) -> Term s b
   pmatch' l' = unH $
     case_SList
       (H $ \f -> f PDNil)
@@ -275,16 +275,16 @@ You can specify the label to associate with the field using type applications-
 
 @
 
-foo :: Term s (PDataRecord '[ "fooField" ':= PByteString ])
+fooPPlutus' s => Term s (PDataRecord '[ "fooField" ':= PByteString ])
 foo = pdcons @"fooField" # pdata (phexByteStr "ab") # pdnil
 
 @
 -}
-pdcons :: forall label a l s. Term s (PAsData a :--> PDataRecord l :--> PDataRecord ((label ':= a) ': l))
+pdcons :: forall label a l s. Term s (PAsData a #-> PDataRecord l #-> PDataRecord ((label ':= a) ': l))
 pdcons = punsafeCoerce $ pcons @PBuiltinList @PData
 
 -- | An empty 'PDataRecord'.
-pdnil :: Term s (PDataRecord '[])
+pdnilPPlutus' s => Term s (PDataRecord '[])
 pdnil = punsafeCoerce $ pnil @PBuiltinList @PData
 
 data PLabeledType = Symbol := PType
@@ -393,23 +393,23 @@ instance PEq (PDataSum defs) where
 instance All (Compose POrd PDataRecord) defs => PPartialOrd (PDataSum defs) where
   x' #< y' = f # x' # y'
     where
-      f :: Term s (PDataSum defs :--> PDataSum defs :--> PBool)
+      fPPlutus' s => Term s (PDataSum defs #-> PDataSum defs #-> PBool)
       f = phoistAcyclic $ plam $ \x y -> pmatchLT x y mkLTHandler
   x' #<= y' = f # x' # y'
     where
-      f :: Term s (PDataSum defs :--> PDataSum defs :--> PBool)
+      fPPlutus' s => Term s (PDataSum defs #-> PDataSum defs #-> PBool)
       f = phoistAcyclic $ plam $ \x y -> pmatchLT x y mkLTEHandler
 
 instance All (Compose POrd PDataRecord) defs => POrd (PDataSum defs)
 
 -- | If there is only a single variant, then we can safely extract it.
-punDataSum :: Term s (PDataSum '[def] :--> PDataRecord def)
+punDataSumPPlutus' s => Term s (PDataSum '[def] #-> PDataRecord def)
 punDataSum = phoistAcyclic $
   plam $ \t ->
     (punsafeCoerce $ psndBuiltin # (pasConstr #$ pforgetData $ pdata t) :: Term _ (PDataRecord def))
 
 -- | Try getting the nth variant. Errs if it's another variant.
-ptryIndexDataSum :: (KnownNat n) => Proxy n -> Term s (PDataSum (def : defs) :--> PDataRecord (IndexList n (def : defs)))
+ptryIndexDataSum :: (KnownNat n) => Proxy n -> Term s (PDataSum (def : defs) #-> PDataRecord (IndexList n (def : defs)))
 ptryIndexDataSum n = phoistAcyclic $
   plam $ \t ->
     plet (pasConstr #$ pforgetData $ pdata t) $ \d ->
@@ -455,7 +455,7 @@ instance PlutusTypeStrat PlutusTypeData where
 newtype DualReprHandler s out def = DualRepr (Term s (PDataRecord def) -> Term s (PDataRecord def) -> Term s out)
 
 -- | Optimized dual pmatch specialized for lexicographic '#<' and '#<=' implementations.
-pmatchLT :: Term s (PDataSum defs) -> Term s (PDataSum defs) -> NP (DualReprHandler s PBool) defs -> Term s PBool
+pmatchLTPPlutus' s => Term s (PDataSum defs) -> Term s (PDataSum defs) -> NP (DualReprHandler s PBool) defs -> Term s PBool
 pmatchLT d1 d2 (DualRepr handler :* Nil) = handler (punDataSum # d1) (punDataSum # d2)
 pmatchLT d1 d2 handlers = unTermCont $ do
   a <- tcont . plet $ pasConstr #$ pforgetData $ pdata d1
@@ -611,6 +611,8 @@ newtype
     (p :: PType) -- The Plutarch synonym to the Haskell type
   = -- | The Haskell type for which @PConstant is being derived.
     DerivePConstantViaData h
+  deriving
+  newtype (Ledger.ToData, Ledger.FromData)
 
 instance
   ( PSubtype PData p
@@ -622,8 +624,8 @@ instance
   where
   type PConstantRepr (DerivePConstantViaData h p) = Ledger.Data
   type PConstanted (DerivePConstantViaData h p) = p
-  pconstantToRepr (DerivePConstantViaData x) = Ledger.toData x
-  pconstantFromRepr x = DerivePConstantViaData <$> Ledger.fromData x
+  pconstantToRepr= Ledger.toData
+  pconstantFromRepr = Ledger.fromData
 
 ----------------------- HRecP and friends -----------------------------------------------
 

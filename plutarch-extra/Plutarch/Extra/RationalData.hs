@@ -56,7 +56,7 @@ instance PTryFrom PData (PAsData PRationalData) where
 
 newtype Flip f a b = Flip (f b a) deriving stock (Generic)
 
-prationalFromData :: ClosedTerm (PRationalData :--> PRational)
+prationalFromData :: ClosedTerm (PRationalData #-> PRational)
 prationalFromData = phoistAcyclic $
   plam $ \x -> unTermCont $ do
     l <- pletFieldsC @'["numerator", "denominator"] x

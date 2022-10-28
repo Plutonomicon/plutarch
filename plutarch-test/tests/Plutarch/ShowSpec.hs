@@ -78,7 +78,7 @@ spec = do
         @| pshow (pcon @(PPair PInteger (PBuiltinList PInteger)) $ PPair 42 $ pconstant [1, 2, 3])
         @== str "PPair 42 [1, 2, 3]"
     "rational" @\ do
-      let rat :: Term s PRational -> Term s PRational
+      let ratPPlutus' s => Term s PRational -> Term s PRational
           rat = id
       "1/2"
         @| pshow (rat $ 1 / 2)

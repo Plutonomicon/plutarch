@@ -35,8 +35,8 @@ pmember ::
   Term
     s
     ( PAsData a
-        :--> PInterval a
-        :--> PBool
+        #-> PInterval a
+        #-> PBool
     )
 pmember = phoistAcyclic $ plam $ \a i -> pcontains # i # (psingleton # a)
 
@@ -49,8 +49,8 @@ pinterval ::
   Term
     s
     ( PAsData a
-        :--> PAsData a
-        :--> PInterval a
+        #-> PAsData a
+        #-> PInterval a
     )
 pinterval = phoistAcyclic $
   plam $ \a b ->
@@ -64,7 +64,7 @@ pinterval = phoistAcyclic $
 {- | create an interval that includes all values that are greater than or equal
  - to a
 -}
-pfrom :: forall a s. PIsData a => Term s (PAsData a :--> PInterval a)
+pfrom :: forall a s. PIsData a => Term s (PAsData a #-> PInterval a)
 pfrom = phoistAcyclic $
   plam $ \a ->
     let start :: Term _ (PExtended a)
@@ -76,7 +76,7 @@ pfrom = phoistAcyclic $
 {- | create an interval that includes all values that are smaller than or equal
  - to a
 -}
-pto :: forall a (s :: S). PIsData a => Term s (PAsData a :--> PInterval a)
+pto :: forall a (s :: S). PIsData a => Term s (PAsData a #-> PInterval a)
 pto = phoistAcyclic $
   plam $ \a ->
     let start :: Term _ (PExtended a)
@@ -95,7 +95,7 @@ pnever :: forall a (s :: S). (PIsData a, PLiftData a) => Term s (PInterval a)
 pnever = pconstant Plutus.never
 
 -- | create and interval [a, a]
-psingleton :: forall a (s :: S). PIsData a => Term s (PAsData a :--> PInterval a)
+psingleton :: forall a (s :: S). PIsData a => Term s (PAsData a #-> PInterval a)
 psingleton = phoistAcyclic $
   plam $ \a ->
     plet (pcon $ PFinite $ pdcons @"_0" # a # pdnil) $ \start ->
@@ -108,8 +108,8 @@ phull ::
   Term
     s
     ( PInterval a
-        :--> PInterval a
-        :--> PInterval a
+        #-> PInterval a
+        #-> PInterval a
     )
 phull = phoistAcyclic $
   plam $ \x' y' -> P.do
@@ -133,8 +133,8 @@ pintersection ::
   Term
     s
     ( PInterval a
-        :--> PInterval a
-        :--> PInterval a
+        #-> PInterval a
+        #-> PInterval a
     )
 pintersection = phoistAcyclic $
   plam $ \x' y' -> P.do
@@ -159,8 +159,8 @@ pcontains ::
   Term
     s
     ( PInterval a
-        :--> PInterval a
-        :--> PBool
+        #-> PInterval a
+        #-> PBool
     )
 pcontains = phoistAcyclic $
   plam $ \x' y' -> P.do
@@ -181,8 +181,8 @@ pbefore ::
   Term
     s
     ( a
-        :--> PInterval a
-        :--> PBool
+        #-> PInterval a
+        #-> PBool
     )
 pbefore = phoistAcyclic $
   plam $ \a y ->
@@ -196,8 +196,8 @@ pafter ::
   Term
     s
     ( a
-        :--> PInterval a
-        :--> PBool
+        #-> PInterval a
+        #-> PBool
     )
 pafter = phoistAcyclic $
   plam $ \a y ->
@@ -211,8 +211,8 @@ pinterval' ::
   Term
     s
     ( PAsData (PLowerBound a)
-        :--> PAsData (PUpperBound a)
-        :--> PInterval a
+        #-> PAsData (PUpperBound a)
+        #-> PInterval a
     )
 pinterval' = phoistAcyclic $
   plam $ \lower upper ->
@@ -228,8 +228,8 @@ pclosedInterval ::
   Term
     s
     ( PExtended a
-        :--> PExtended a
-        :--> PInterval a
+        #-> PExtended a
+        #-> PInterval a
     )
 pclosedInterval = phoistAcyclic $
   plam $ \start end ->
@@ -260,8 +260,8 @@ pbefore' ::
   Term
     s
     ( a
-        :--> EndPoint a
-        :--> PBool
+        #-> EndPoint a
+        #-> PBool
     )
 pbefore' = phoistAcyclic $
   plam $ \a y' -> P.do
@@ -281,8 +281,8 @@ pafter' ::
   Term
     s
     ( a
-        :--> EndPoint a
-        :--> PBool
+        #-> EndPoint a
+        #-> PBool
     )
 pafter' = phoistAcyclic $
   plam $ \a y' -> P.do
@@ -295,15 +295,15 @@ pafter' = phoistAcyclic $
       (pmatch yt (gtE' a))
       (pmatch yt (geqE' a))
 
--- | (x :: Term s (EndPoint a)) <= (y :: Term s (EndPoint a))
+-- | (xPPlutus' s => Term s (EndPoint a)) <= (yPPlutus' s => Term s (EndPoint a))
 leqP ::
   forall a (s :: S).
   (PIsData a, POrd a, PEq a) =>
   Term
     s
     ( EndPoint a
-        :--> EndPoint a
-        :--> PBool
+        #-> EndPoint a
+        #-> PBool
     )
 leqP = phoistAcyclic $
   plam $ \x' y' -> P.do
@@ -327,8 +327,8 @@ minP ::
   Term
     s
     ( EndPoint a
-        :--> EndPoint a
-        :--> EndPoint a
+        #-> EndPoint a
+        #-> EndPoint a
     )
 minP = phoistAcyclic $ plam $ \x y -> pif' # (leqP # x # y) # x # y
 
@@ -338,20 +338,20 @@ maxP ::
   Term
     s
     ( EndPoint a
-        :--> EndPoint a
-        :--> EndPoint a
+        #-> EndPoint a
+        #-> EndPoint a
     )
 maxP = phoistAcyclic $ plam $ \x y -> pif' # (leqP # x # y) # y # x
 
--- | (x :: Term s (PExtended a)) < (y :: Term s (PExtended b))
+-- | (xPPlutus' s => Term s (PExtended a)) < (yPPlutus' s => Term s (PExtended b))
 ltE ::
   forall a (s :: S).
   (POrd a, PIsData a) =>
   Term
     s
     ( PExtended a
-        :--> PExtended a
-        :--> PBool
+        #-> PExtended a
+        #-> PBool
     )
 ltE = phoistAcyclic $ plam $ \x y -> pmatch x (cont y)
   where
@@ -361,15 +361,15 @@ ltE = phoistAcyclic $ plam $ \x y -> pmatch x (cont y)
       PPosInf _ -> pmatch y' isPosInf
       PFinite l -> pmatch y' (ltE' $ pfield @"_0" # l)
 
--- | (x :: Term s (PExtended a)) = (y :: Term s (PExtended b))
+-- | (xPPlutus' s => Term s (PExtended a)) = (yPPlutus' s => Term s (PExtended b))
 eqE ::
   forall a (s :: S).
   (PEq a, PIsData a) =>
   Term
     s
     ( PExtended a
-        :--> PExtended a
-        :--> PBool
+        #-> PExtended a
+        #-> PBool
     )
 eqE = phoistAcyclic $
   plam $ \x y ->
@@ -436,15 +436,15 @@ geqE' ::
   Term s PBool
 geqE' a y = gtE' a y #|| eqE' a y
 
--- | (x :: Term s (PExtended a)) <= (y :: Term s (PExtended b))
+-- | (xPPlutus' s => Term s (PExtended a)) <= (yPPlutus' s => Term s (PExtended b))
 leqE ::
   forall a (s :: S).
   (PEq a, POrd a, PIsData a) =>
   Term
     s
     ( PExtended a
-        :--> PExtended a
-        :--> PBool
+        #-> PExtended a
+        #-> PBool
     )
 leqE = phoistAcyclic $ plam $ \x y -> ltE # x # y #|| eqE # x # y
 
@@ -464,8 +464,8 @@ type EndPoint a =
      , "_1" ':= PClosure
      ]
 
-uToE :: Term s (PUpperBound a :--> EndPoint a)
+uToEPPlutus' s => Term s (PUpperBound a #-> EndPoint a)
 uToE = phoistAcyclic $ plam $ \x -> pmatch x (\(PUpperBound a) -> a)
 
-lToE :: Term s (PLowerBound a :--> EndPoint a)
+lToEPPlutus' s => Term s (PLowerBound a #-> EndPoint a)
 lToE = phoistAcyclic $ plam $ \x -> pmatch x (\(PLowerBound a) -> a)

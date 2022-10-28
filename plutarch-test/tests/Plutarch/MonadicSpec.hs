@@ -71,7 +71,7 @@ spec = do
       describe "getFields" . pgoldenSpec $ do
         "0" @| getFields
 
-checkSignatory :: Term s (PPubKeyHash :--> PScriptContext :--> PUnit)
+checkSignatoryPPlutus' s => Term s (PPubKeyHash #-> PScriptContext #-> PUnit)
 checkSignatory = plam $ \ph ctx' ->
   pletFields @["txInfo", "purpose"] ctx' $ \ctx -> P.do
     PSpending _ <- pmatch $ ctx.purpose
@@ -83,7 +83,7 @@ checkSignatory = plam $ \ph ctx' ->
       -- Signature not present.
       perror
 
-getFields :: Term s (PAddress :--> PDataRecord '["credential" ':= PCredential, "stakingCredential" ':= PMaybeData PStakingCredential])
+getFieldsPPlutus' s => Term s (PAddress #-> PDataRecord '["credential" ':= PCredential, "stakingCredential" ':= PMaybeData PStakingCredential])
 getFields = phoistAcyclic $
   plam $ \addr -> P.do
     PAddress addrFields <- pmatch addr

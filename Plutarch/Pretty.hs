@@ -64,7 +64,7 @@ import Plutarch.Prelude
 import Plutarch.Api.V1
 import Plutarch.Extra.TermCont
 
-checkSignatory :: Term s (PPubKeyHash :--> PScriptContext :--> PUnit)
+checkSignatoryPPlutus' s => Term s (PPubKeyHash #-> PScriptContext #-> PUnit)
 checkSignatory = plam $ \ph ctx' -> unTermCont $ do
   ctx <- pletFieldsC @["txInfo", "purpose"] ctx'
   purph <- pmatchC ctx.purpose

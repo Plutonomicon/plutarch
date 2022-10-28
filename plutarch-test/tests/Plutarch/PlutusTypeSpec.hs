@@ -34,7 +34,7 @@ spec = do
         "B" @| swap (pcon B) @== pcon A
       "scottenc" @\ do
         "PMaybe"
-          @| ( let a = 42 :: Term s PInteger
+          @| ( let a = 42PPlutus' s => Term s PInteger
                 in pmatch (pcon $ PJust a) $ \case
                     PJust x -> x
                     -- We expect this perror not to be evaluated eagerly when mx
@@ -42,9 +42,9 @@ spec = do
                     PNothing -> perror
              )
         "PPair"
-          @| ( let a = 42 :: Term s PInteger
-                   b = "Universe" :: Term s PString
-                in pmatch (pcon (PPair a b) :: Term s (PPair PInteger PString)) $ \(PPair _ y) -> y
+          @| ( let a = 42PPlutus' s => Term s PInteger
+                   b = "Universe"PPlutus' s => Term s PString
+                in pmatch (pcon (PPair a b)PPlutus' s => Term s (PPair PInteger PString)) $ \(PPair _ y) -> y
              )
     describe "instances-sanity" $ do
       it "PBuiltinList" $ do
@@ -255,14 +255,14 @@ deconstrSpec = do
     rewarding = Rewarding (StakingPtr 42 0 7)
     certifying = Certifying DCertGenesis
     -- Bench given function feeding in all 4 types of script purpose (typed).
-    benchPurpose :: ClosedTerm (PScriptPurpose :--> PByteString) -> PlutarchGoldens
+    benchPurpose :: ClosedTerm (PScriptPurpose #-> PByteString) -> PlutarchGoldens
     benchPurpose f = do
       "minting" @| f # pconstant minting
       "spending" @| f # pconstant spending
       "rewarding" @| f # pconstant rewarding
       "certifying" @| f # pconstant certifying
     -- Bench given function feeding in all 4 types of script purpose (untyped).
-    benchPurpose' :: ClosedTerm (PData :--> PByteString) -> PlutarchGoldens
+    benchPurpose' :: ClosedTerm (PData #-> PByteString) -> PlutarchGoldens
     benchPurpose' f = do
       "minting" @| f #$ pconstant $ toData minting
       "spending" @| f #$ pconstant $ toData spending
@@ -282,7 +282,7 @@ pmatchTargetEval target =
     - add more sanity checks
 describe "sanity checks" $ do
   describe "PBuiltinList" $ do
-    let p :: Term s (PBuiltinList PInteger)
+    let pPPlutus' s => Term s (PBuiltinList PInteger)
         p = pconstant [1,2,3,4]
     it "works" $
  -}
@@ -298,7 +298,7 @@ instance DerivePlutusType AB where type DPTStrat _ = PlutusTypeScott
   Instead of using `pcon'` and `pmatch'` directly,
   use 'pcon' and 'pmatch', to hide the `PInner` type.
 -}
-swap :: Term s AB -> Term s AB
+swapPPlutus' s => Term s AB -> Term s AB
 swap x = pmatch x $ \case
   A -> pcon B
   B -> pcon A

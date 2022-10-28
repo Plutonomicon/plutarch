@@ -2,7 +2,7 @@
 
 module Plutarch.Internal (
   -- | $hoisted
-  (:-->) (PLam),
+  (#->) (PLam),
   PDelayed,
   -- | $term
   Term (..),
@@ -173,9 +173,9 @@ newtype Term (s :: S) (a :: PType) = Term {asRawTerm :: Word64 -> TermMonad Term
 -}
 type ClosedTerm (a :: PType) = forall (s :: S). Term s a
 
-data (:-->) (a :: PType) (b :: PType) (s :: S)
+data (#->) (a :: PType) (b :: PType) (s :: S)
   = PLam (Term s a -> Term s b)
-infixr 0 :-->
+infixr 0 #->
 
 data PDelayed (a :: PType) (s :: S)
 
@@ -185,7 +185,7 @@ data PDelayed (a :: PType) (s :: S)
   Only works with a single argument.
   Use 'plam' instead, to support currying.
 -}
-plam' :: (Term s a -> Term s b) -> Term s (a :--> b)
+plam' :: (Term s a -> Term s b) -> Term s (a #-> b)
 plam' f = Term \i ->
   let v = Term \j -> pure $ mkTermRes $ RVar (j - (i + 1))
    in flip fmap (asRawTerm (f v) (i + 1)) \case
@@ -274,7 +274,7 @@ plam' f = Term \i ->
 
   But sufficiently small terms in WHNF may be inlined for efficiency.
 -}
-plet :: Term s a -> (Term s a -> Term s b) -> Term s b
+pletPPlutus' s => Term s a -> (Term s a -> Term s b) -> Term s b
 plet v f = Term \i ->
   asRawTerm v i >>= \case
     -- Inline sufficiently small terms in WHNF
@@ -290,7 +290,7 @@ pthrow :: HasCallStack => Text -> Term s a
 pthrow = Term . pure . pthrow'
 
 -- | Lambda Application.
-papp :: HasCallStack => Term s (a :--> b) -> Term s a -> Term s b
+papp :: HasCallStack => Term s (a #-> b) -> Term s a -> Term s b
 papp x y = Term \i ->
   (,) <$> (asRawTerm x i) <*> (asRawTerm y i) >>= \case
     -- Applying anything to an error is an error.
@@ -308,14 +308,14 @@ papp x y = Term \i ->
 {- |
   Plutus \'delay\', used for laziness.
 -}
-pdelay :: Term s a -> Term s (PDelayed a)
+pdelayPPlutus' s => Term s a -> Term s (PDelayed a)
 pdelay x = Term \i -> mapTerm RDelay <$> asRawTerm x i
 
 {- |
   Plutus \'force\',
   used to force evaluation of 'PDelayed' terms.
 -}
-pforce :: Term s (PDelayed a) -> Term s a
+pforcePPlutus' s => Term s (PDelayed a) -> Term s a
 pforce x = Term \i ->
   asRawTerm x i <&> \case
     -- A force cancels a delay
@@ -328,7 +328,7 @@ pforce x = Term \i ->
   When using this explicitly, it should be ensured that
   the containing term is delayed, avoiding premature evaluation.
 -}
-perror :: Term s a
+perrorPPlutus' s => Term s a
 perror = Term \_ -> pure $ mkTermRes RError
 
 pgetConfig :: (Config -> Term s a) -> Term s a
@@ -342,7 +342,7 @@ pgetConfig f = Term \lvl -> TermMonad $ do
   This should mostly be avoided, though it can be safely
   used to assert known types of Datums, Redeemers or ScriptContext.
 -}
-punsafeCoerce :: Term s a -> Term s b
+punsafeCoercePPlutus' s => Term s a -> Term s b
 punsafeCoerce (Term x) = Term x
 
 punsafeBuiltin :: UPLC.DefaultFun -> Term s a
@@ -481,7 +481,7 @@ hashTerm config t = hashRawTerm . getTerm <$> runReaderT (runTermMonad $ asRawTe
   >>> f # x # y
   f x y
 -}
-(#) :: HasCallStack => Term s (a :--> b) -> Term s a -> Term s b
+(#) :: HasCallStack => Term s (a #-> b) -> Term s a -> Term s b
 (#) = papp
 
 infixl 8 #
@@ -493,7 +493,7 @@ infixl 8 #
   >>> f # x #$ g # y # z
   f x (g y z)
 -}
-(#$) :: HasCallStack => Term s (a :--> b) -> Term s a -> Term s b
+(#$) :: HasCallStack => Term s (a #-> b) -> Term s a -> Term s b
 (#$) = papp
 
 infixr 0 #$

@@ -50,7 +50,7 @@ import Plutarch (
   pmatch,
   pto,
   (#),
-  (:-->),
+  (#->),
  )
 import Plutarch.Bool (PBool, PEq, (#==))
 import Plutarch.Builtin (PData)
@@ -128,15 +128,15 @@ unsafeForeignImport :: CompiledCode t -> ClosedTerm p
 unsafeForeignImport c = Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm $ unScript $ fromCompiledCode c) []
 
 -- | Convert a 'PList' to a 'PTxList', perhaps before exporting it with 'foreignExport'.
-plistToTx :: Term s (PList a :--> PTxList a)
+plistToTxPPlutus' s => Term s (PList a #-> PTxList a)
 plistToTx = pconvertLists
 
 -- | Convert a 'PTxList' to a 'PList', probably after importing it with 'foreignImport'.
-plistFromTx :: Term s (PTxList a :--> PList a)
+plistFromTxPPlutus' s => Term s (PTxList a #-> PList a)
 plistFromTx = pconvertLists
 
 -- | Convert a 'PMaybe' to a 'PTxMaybe', perhaps before exporting it with 'foreignExport'.
-pmaybeToTx :: Term s (PMaybe a :--> PTxMaybe a)
+pmaybeToTxPPlutus' s => Term s (PMaybe a #-> PTxMaybe a)
 pmaybeToTx =
   plam $
     flip pmatch $
@@ -145,7 +145,7 @@ pmaybeToTx =
         PJust x -> PTxJust x
 
 -- | Convert a 'PTxMaybe' to a 'PMaybe', probably after importing it with 'foreignImport'.
-pmaybeFromTx :: Term s (PTxMaybe a :--> PMaybe a)
+pmaybeFromTxPPlutus' s => Term s (PTxMaybe a #-> PMaybe a)
 pmaybeFromTx =
   plam $
     flip pmatch $
@@ -153,7 +153,7 @@ pmaybeFromTx =
         PTxNothing -> PNothing
         PTxJust x -> PJust x
 
-newtype PTxList' a r s = PTxList' (Term s (PDelayed (r :--> (a :--> PTxList a :--> r) :--> r)))
+newtype PTxList' a r s = PTxList' (Term s (PDelayed (r #-> (a #-> PTxList a #-> r) #-> r)))
   deriving stock (Generic)
   deriving anyclass (PlutusType)
 instance DerivePlutusType (PTxList' a r) where type DPTStrat _ = PlutusTypeNewtype
@@ -170,7 +170,7 @@ instance PListLike PTxList where
   pcons = phoistAcyclic $ plam $ \x xs -> pcon (PTxCons x xs)
   pnil = pcon PTxNil
 
-newtype PTxMaybe' a r s = PTxMaybe' (Term s (PDelayed ((a :--> r) :--> r :--> r)))
+newtype PTxMaybe' a r s = PTxMaybe' (Term s (PDelayed ((a #-> r) #-> r #-> r)))
   deriving stock (Generic)
   deriving anyclass (PlutusType)
 instance DerivePlutusType (PTxMaybe' a r) where type DPTStrat _ = PlutusTypeNewtype
@@ -197,7 +197,7 @@ type family (p :: PType) >~< (t :: Type) :: Constraint where
   PByteString >~< BuiltinByteString = ()
   PData >~< BuiltinData = ()
   PUnit >~< BuiltinUnit = ()
-  (a :--> b) >~< (a' -> b') = (a >~< a', b >~< b')
+  (a #-> b) >~< (a' -> b') = (a >~< a', b >~< b')
   (PTxList a) >~< [a'] = a >~< a'
   (PTxMaybe a) >~< Maybe a' = a >~< a'
   (PDelayed p) >~< t = (DPTStrat p ~ PlutusTypeScott, G (PCode p) (TypeEncoding t))

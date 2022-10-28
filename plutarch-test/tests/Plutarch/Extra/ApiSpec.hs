@@ -53,7 +53,7 @@ spec = do
             passert $ res #== pcon (PJust $ pdata $ d0DatTerm)
 
 -- | The Plutarch term we expect when decoding `d0Dat`.
-d0DatTerm :: Term s (PBuiltinList (PAsData PInteger))
+d0DatTermPPlutus' s => Term s (PBuiltinList (PAsData PInteger))
 d0DatTerm = liftList $ flip fmap d0DatValue $ \i -> pdata $ pconstant i
 
 liftList :: PLift a => [Term s a] -> Term s (PBuiltinList a)

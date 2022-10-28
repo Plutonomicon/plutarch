@@ -298,7 +298,7 @@ newtype PNatural (s :: S) = PMkNatural (Term s PInteger)
 instance DerivePlutusType PNatural where type DPTStrat _ = PlutusTypeNewtype
 
 -- | partial
-pmkNatural :: Term s (PInteger :--> PNatural)
+pmkNaturalPPlutus' s => Term s (PInteger #-> PNatural)
 pmkNatural = plam $ \i -> pif (i #< 0) (ptraceError "could not make natural") (pcon $ PMkNatural i)
 
 newtype Flip f b a = Flip (f a b)
@@ -307,11 +307,11 @@ newtype Flip f b a = Flip (f a b)
 instance PTryFrom PData (PAsData PNatural) where
   type PTryFromExcess PData (PAsData PNatural) = Flip Term PNatural
   ptryFrom' opq = runTermCont $ do
-    (ter, exc) <- TermCont $ ptryFrom @(PAsData PInteger) opq
+    (ter, exc) <- tcont $ ptryFrom @(PAsData PInteger) opq
     ver <- tcont $ plet $ pmkNatural #$ exc
     pure (punsafeDowncast ter, ver)
 
-validator :: Term s PValidator
+validatorPPlutus' s => Term s PValidator
 validator = phoistAcyclic $
   plam $ \dat red ctx -> unTermCont $ do
     trustedRedeemer <- (\(snd -> red) -> red) <$> (TermCont $ ptryFrom @(PAsData (PBuiltinList (PAsData PNatural))) red)
@@ -359,7 +359,7 @@ validator = phoistAcyclic $
         singleOutput :: Term _ PBool
         singleOutput = pnull #$ ptail #$ pfilter # pred # outputs
           where
-            pred :: Term _ (PTxOut :--> PBool)
+            pred :: Term _ (PTxOut #-> PBool)
             pred = plam $ \out -> unTermCont $ do
               pure $ pfield @"address" # pdata out #== pdata ownAddress
 
@@ -376,7 +376,7 @@ validator = phoistAcyclic $
     pure $
       pif isValid (popaque $ pcon PUnit) (ptraceError "not valid")
 
-pfindOwnInput :: Term s (PScriptContext :--> PMaybe PTxInInfo)
+pfindOwnInputPPlutus' s => Term s (PScriptContext #-> PMaybe PTxInInfo)
 pfindOwnInput = phoistAcyclic $
   plam $ \ctx' -> unTermCont $ do
     ctx <- tcont $ pletFields @["txInfo", "purpose"] ctx'
@@ -385,7 +385,7 @@ pfindOwnInput = phoistAcyclic $
         txInInfos = pfield @"inputs" #$ ctx.txInfo
         target :: Term _ PTxOutRef
         target = pfield @"_0" # txoutRef
-        pred :: Term _ (PTxInInfo :--> PBool)
+        pred :: Term _ (PTxInInfo #-> PBool)
         pred = plam $ \actual ->
           target #== pfield @"outRef" # actual
     pure $ pfind # pred # txInInfos
@@ -400,13 +400,13 @@ toDatadList = pdata . (foldr go pnil)
 
 ------------------- Sample type with PIsDataRepr -----------------------------------
 
-sampleAB :: Term s (PAsData PAB)
+sampleABPPlutus' s => Term s (PAsData PAB)
 sampleAB = pdata $ pcon $ PA (pdcons @"_0" # (pdata $ pconstant 4) #$ pdcons # (pdata $ pconstant "foo") # pdnil)
 
-sampleABdata :: Term s PData
+sampleABdataPPlutus' s => Term s PData
 sampleABdata = pforgetData sampleAB
 
-recoverAB :: Term s (PAsData PAB)
+recoverABPPlutus' s => Term s (PAsData PAB)
 recoverAB = unTermCont $ fst <$> tcont (ptryFrom sampleABdata)
 
 data PAB (s :: S)
@@ -419,13 +419,13 @@ instance PTryFrom PData (PAsData PAB)
 
 ------------------- Sample usage with recovered record type ------------------------
 
-untrustedRecord :: Term s PData
+untrustedRecordPPlutus' s => Term s PData
 untrustedRecord =
-  let rec :: Term s (PAsData (PDataRecord '["_0" ':= (PDataRecord '["_1" ':= PInteger])]))
+  let recPPlutus' s => Term s (PAsData (PDataRecord '["_0" ':= (PDataRecord '["_1" ':= PInteger])]))
       rec = pdata $ pdcons # (pdata $ pdcons # pdata (pconstant 42) # pdnil) # pdnil
    in pforgetData rec
 
-theField :: Term s PInteger
+theFieldPPlutus' s => Term s PInteger
 theField = unTermCont $ do
   (_, exc) <- tcont (ptryFrom @(PAsData (PDataRecord '["_0" ':= (PDataRecord '["_1" ':= PInteger])])) untrustedRecord)
   pure $ snd . getField @"_1" . snd . snd . getField @"_0" . snd $ exc

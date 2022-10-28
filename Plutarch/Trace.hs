@@ -27,17 +27,17 @@ ptraceShowId a = pgetConfig \c -> case tracingMode c of
   _ -> ptrace (pshow a) a
 
 -- | Trace the given message and terminate evaluation with a 'perror'.
-ptraceError :: Term s PString -> Term s a
+ptraceErrorPPlutus' s => Term s PString -> Term s a
 ptraceError = flip ptrace perror
 
 -- | Trace the given message if the argument evaluates to true.
-ptraceIfTrue :: Term s PString -> Term s PBool -> Term s PBool
+ptraceIfTruePPlutus' s => Term s PString -> Term s PBool -> Term s PBool
 ptraceIfTrue s a' = pgetConfig \c -> case tracingMode c of
   NoTracing -> a'
   _ -> plet a' $ \a -> pif a (ptrace' # s # a) a
 
 -- | Trace the given message if the argument evaluates to False.
-ptraceIfFalse :: Term s PString -> Term s PBool -> Term s PBool
+ptraceIfFalsePPlutus' s => Term s PString -> Term s PBool -> Term s PBool
 ptraceIfFalse s a' = pgetConfig \c -> case tracingMode c of
   NoTracing -> a'
   _ -> plet a' $ \a -> pif a a (ptrace' # s # a)

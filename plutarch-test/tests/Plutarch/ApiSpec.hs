@@ -306,7 +306,7 @@ spec = do
   An example 'PScriptContext' Term,
   lifted with 'pconstant'
 -}
-ctx :: Term s PScriptContext
+ctxPPlutus' s => Term s PScriptContext
 ctx =
   pconstant
     (ScriptContext info purpose)
@@ -371,18 +371,18 @@ signatories = ["ab01fe235c", "123014", "abcdef"]
 
 --------------------------------------------------------------------------------
 
-getTxInfo :: Term s (PScriptContext :--> PAsData PTxInfo)
+getTxInfoPPlutus' s => Term s (PScriptContext #-> PAsData PTxInfo)
 getTxInfo =
   plam $ \ctx ->
     pfield @"txInfo" # ctx
 
-getMint :: Term s (PAsData PTxInfo :--> PAsData (PValue 'Sorted 'NoGuarantees))
+getMintPPlutus' s => Term s (PAsData PTxInfo #-> PAsData (PValue 'Sorted 'NoGuarantees))
 getMint =
   plam $ \info ->
     pfield @"mint" # info
 
 -- | Get validator from first input in ScriptContext's TxInfo
-getCredentials :: Term s PScriptContext -> Term s (PBuiltinList PData)
+getCredentialsPPlutus' s => Term s PScriptContext -> Term s (PBuiltinList PData)
 getCredentials ctx =
   let inp = pfield @"inputs" #$ pfield @"txInfo" # ctx
    in pmap # inputCredentialHash # inp
@@ -391,7 +391,7 @@ getCredentials ctx =
   Get the hash of the Credential in an input, treating
   PubKey & ValidatorHash identically.
 -}
-inputCredentialHash :: Term s (PTxInInfo :--> PData)
+inputCredentialHashPPlutus' s => Term s (PTxInInfo #-> PData)
 inputCredentialHash =
   phoistAcyclic $
     plam $ \inp ->
@@ -403,18 +403,18 @@ inputCredentialHash =
        in phead #$ psndBuiltin #$ pasConstr # pforgetData credential
 
 -- | Get first CurrencySymbol from Value
-getSym :: Term s (PValue 'Sorted 'NonZero :--> PAsData PCurrencySymbol)
+getSymPPlutus' s => Term s (PValue 'Sorted 'NonZero #-> PAsData PCurrencySymbol)
 getSym =
   plam $ \v -> pfstBuiltin #$ phead # pto (pto v)
 
 -- | `checkSignatory` implemented using `runCont`
-checkSignatoryCont :: forall s. Term s (PPubKeyHash :--> PScriptContext :--> PUnit)
+checkSignatoryCont :: forall s. Term s (PPubKeyHash #-> PScriptContext #-> PUnit)
 checkSignatoryCont = plam $ \ph ctx' ->
   pletFields @["txInfo", "purpose"] ctx' $ \ctx -> (`runCont` id) $ do
     purpose <- cont (pmatch $ getField @"purpose" ctx)
     pure $ case purpose of
       PSpending _ ->
-        let signatories :: Term s (PBuiltinList (PAsData PPubKeyHash))
+        let signatoriesPPlutus' s => Term s (PBuiltinList (PAsData PPubKeyHash))
             signatories = pfield @"signatories" # getField @"txInfo" ctx
          in pif
               (pelem # pdata ph # signatories)
@@ -426,7 +426,7 @@ checkSignatoryCont = plam $ \ph ctx' ->
         ptraceError "checkSignatoryCont: not a spending tx"
 
 -- | `checkSignatory` implemented using `runTermCont`
-checkSignatoryTermCont :: Term s (PPubKeyHash :--> PScriptContext :--> PUnit)
+checkSignatoryTermContPPlutus' s => Term s (PPubKeyHash #-> PScriptContext #-> PUnit)
 checkSignatoryTermCont = plam $ \ph ctx' -> unTermCont $ do
   ctx <- tcont $ pletFields @["txInfo", "purpose"] ctx'
   tcont (pmatch $ getField @"purpose" ctx) >>= \case
@@ -442,7 +442,7 @@ checkSignatoryTermCont = plam $ \ph ctx' -> unTermCont $ do
     _ ->
       pure $ ptraceError "checkSignatoryCont: not a spending tx"
 
-getFields :: Term s (PData :--> PBuiltinList PData)
+getFieldsPPlutus' s => Term s (PData #-> PBuiltinList PData)
 getFields = phoistAcyclic $ plam $ \addr -> psndBuiltin #$ pasConstr # addr
 
 dummyCurrency :: CurrencySymbol
@@ -450,10 +450,10 @@ dummyCurrency = Value.currencySymbol "\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x
 
 ------------------- Mocking a ScriptContext ----------------------------------------
 
-validContext0 :: Term s PScriptContext
+validContext0PPlutus' s => Term s PScriptContext
 validContext0 = mkCtx validOutputs0 validDatums1
 
-invalidContext1 :: Term s PScriptContext
+invalidContext1PPlutus' s => Term s PScriptContext
 invalidContext1 = mkCtx invalidOutputs1 validDatums1
 
 mkCtx :: [TxOut] -> [(DatumHash, Datum)] -> Term s PScriptContext

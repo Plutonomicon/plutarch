@@ -94,7 +94,7 @@ authorizedPolicy ::
   Term s PScriptContext ->
   Term s POpaque
 authorizedPolicy authHash _redeemer ctx =
-  let sigs :: Term s (PBuiltinList (PAsData PPubKeyHash))
+  let sigsPPlutus' s => Term s (PBuiltinList (PAsData PPubKeyHash))
       sigs = pfromData (pfield @"signatories" #$ pfield @"txInfo" # ctx)
    in pif
         (pelem # authHash # sigs)
@@ -112,7 +112,7 @@ authorizedStakeValidator ::
   Term s PScriptContext ->
   Term s POpaque
 authorizedStakeValidator authHash _redeemer ctx =
-  let sigs :: Term s (PBuiltinList (PAsData PPubKeyHash))
+  let sigsPPlutus' s => Term s (PBuiltinList (PAsData PPubKeyHash))
       sigs = pfromData (pfield @"signatories" #$ pfield @"txInfo" # ctx)
    in pif
         (pelem # authHash # sigs)

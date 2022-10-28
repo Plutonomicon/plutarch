@@ -20,7 +20,7 @@ import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
 import Plutarch.Bool (PEq, POrd, PPartialOrd, (#<), (#<=), (#==))
 import Plutarch.Integer (PInteger)
-import Plutarch.Internal (Term, (#), (:-->))
+import Plutarch.Internal (Term, (#), (#->))
 import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Other (POpaque)
 import Plutarch.Internal.PlutusType (DPTStrat, DerivePlutusType, PlutusType)
@@ -78,22 +78,22 @@ pbyteStr = pconstant
 -----------------------------------------------------------
 
 -- | Prepend a byte, represented by a non negative 'PInteger', to a 'PBytestring'.
-pconsBS :: Term s (PInteger :--> PByteString :--> PByteString)
+pconsBSPPlutus' s => Term s (PInteger #-> PByteString #-> PByteString)
 pconsBS = punsafeBuiltin PLC.ConsByteString
 
 {- | Slice a 'PByteString' with given start index and slice length.
 
 >>> (pslice # 2 # 3 phexByteStr "4102afde5b2a") #== phexByteStr "afde5b"
 -}
-psliceBS :: Term s (PInteger :--> PInteger :--> PByteString :--> PByteString)
+psliceBSPPlutus' s => Term s (PInteger #-> PInteger #-> PByteString #-> PByteString)
 psliceBS = punsafeBuiltin PLC.SliceByteString
 
 -- | Find the length of a 'PByteString'.
-plengthBS :: Term s (PByteString :--> PInteger)
+plengthBSPPlutus' s => Term s (PByteString #-> PInteger)
 plengthBS = punsafeBuiltin PLC.LengthOfByteString
 
 -- | 'PByteString' indexing function.
-pindexBS :: Term s (PByteString :--> PInteger :--> PInteger)
+pindexBSPPlutus' s => Term s (PByteString #-> PInteger #-> PInteger)
 pindexBS = punsafeBuiltin PLC.IndexByteString
 
 hexDigitToWord8 :: HasCallStack => Char -> Word8

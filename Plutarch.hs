@@ -1,5 +1,5 @@
 module Plutarch (
-  (PI.:-->),
+  (PI.#->),
   PI.ClosedTerm,
   PI.compile,
   PI.Dig,

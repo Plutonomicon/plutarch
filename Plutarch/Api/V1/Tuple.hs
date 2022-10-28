@@ -11,15 +11,15 @@ type PTuple a b =
         ]
      ]
 
-ptuple :: Term s (PAsData a :--> PAsData b :--> PTuple a b)
+ptuplePPlutus' s => Term s (PAsData a #-> PAsData b #-> PTuple a b)
 ptuple = phoistAcyclic $
   plam $ \x y ->
     let target :: Term _ (PAsData (PBuiltinPair PInteger (PBuiltinList PData)))
         target = pconstrBuiltin # 0 #$ pcons # pforgetData x #$ pcons # pforgetData y # pnil
      in punsafeCoerce target
 
-ptupleFromBuiltin :: Term s (PAsData (PBuiltinPair (PAsData a) (PAsData b))) -> Term s (PAsData (PTuple a b))
+ptupleFromBuiltinPPlutus' s => Term s (PAsData (PBuiltinPair (PAsData a) (PAsData b))) -> Term s (PAsData (PTuple a b))
 ptupleFromBuiltin = punsafeCoerce
 
-pbuiltinPairFromTuple :: Term s (PAsData (PTuple a b)) -> Term s (PAsData (PBuiltinPair (PAsData a) (PAsData b)))
+pbuiltinPairFromTuplePPlutus' s => Term s (PAsData (PTuple a b)) -> Term s (PAsData (PBuiltinPair (PAsData a) (PAsData b)))
 pbuiltinPairFromTuple = punsafeCoerce

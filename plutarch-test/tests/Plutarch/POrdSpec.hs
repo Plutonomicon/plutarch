@@ -174,10 +174,10 @@ _pmatchHelperCred f cred1 cred2 = unTermCont $ do
     (PScriptCredential a, PScriptCredential b) ->
       pto (pfromData $ pfield @"_0" # a) `f` pto (pfromData $ pfield @"_0" # b)
 
-ltCred :: Term s PCredential -> Term s PCredential -> Term s PBool
+ltCredPPlutus' s => Term s PCredential -> Term s PCredential -> Term s PBool
 ltCred = _pmatchHelperCred (#<)
 
-lteCred :: Term s PCredential -> Term s PCredential -> Term s PBool
+lteCredPPlutus' s => Term s PCredential -> Term s PCredential -> Term s PBool
 lteCred = _pmatchHelperCred (#<=)
 
 -- manual 'pmatch' + 'PDataRecord' Ord impl.
@@ -195,14 +195,14 @@ _pmatchDataRecHelperCred f cred1 cred2 = unTermCont $ do
     (PScriptCredential _, PPubKeyCredential _) -> pconstant False
     (PScriptCredential a, PScriptCredential b) -> a `f` b
 
-ltCred' :: Term s PCredential -> Term s PCredential -> Term s PBool
+ltCred'PPlutus' s => Term s PCredential -> Term s PCredential -> Term s PBool
 ltCred' = _pmatchDataRecHelperCred (#<)
 
-lteCred' :: Term s PCredential -> Term s PCredential -> Term s PBool
+lteCred'PPlutus' s => Term s PCredential -> Term s PCredential -> Term s PBool
 lteCred' = _pmatchDataRecHelperCred (#<=)
 
 -- manual 'pmatch' + manual field extraction impl.
-ltTrip :: Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
+ltTripPPlutus' s => Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
 ltTrip trip1 trip2 = unTermCont $ do
   a <- tcont $ pletFields @'["x", "y", "z"] trip1
   b <- tcont $ pletFields @'["x", "y", "z"] trip2
@@ -220,7 +220,7 @@ ltTrip trip1 trip2 = unTermCont $ do
                 )
           )
 
-lteTrip :: Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
+lteTripPPlutus' s => Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
 lteTrip trip1 trip2 = unTermCont $ do
   a <- tcont $ pletFields @'["x", "y", "z"] trip1
   b <- tcont $ pletFields @'["x", "y", "z"] trip2
@@ -249,8 +249,8 @@ _pmatchDataRecHelperTrip f trip1 trip2 = unTermCont $ do
   PTriplet b <- tcont $ pmatch trip2
   pure $ a `f` b
 
-ltTrip' :: Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
+ltTrip'PPlutus' s => Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
 ltTrip' = _pmatchDataRecHelperTrip (#<)
 
-lteTrip' :: Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
+lteTrip'PPlutus' s => Term s (PTriplet PInteger) -> Term s (PTriplet PInteger) -> Term s PBool
 lteTrip' = _pmatchDataRecHelperTrip (#<=)

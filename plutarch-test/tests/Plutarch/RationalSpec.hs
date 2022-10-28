@@ -7,7 +7,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  let rat :: Term s PRational -> Term s PRational
+  let ratPPlutus' s => Term s PRational -> Term s PRational
       rat = id
       assertRat :: ClosedTerm PRational -> ClosedTerm PRational -> Expectation
       assertRat x p = passert $ p #== x
@@ -45,6 +45,6 @@ spec = do
         "2" @| rat 2 @-> assertRat (pfromData (pdata 2))
         "11/3" @| rat 11 / 3 @-> assertRat (pfromData (pdata $ 11 / 3))
     "div by 0" @\ do
-      "1/0" @| ((1 :: Term s PRational) / 0) @-> pfails
-      "recip 0" @| recip (0 :: Term s PRational) @-> pfails
-      "1/(1-1)" @| ((1 :: Term s PRational) / (1 - 1)) @-> pfails
+      "1/0" @| ((1PPlutus' s => Term s PRational) / 0) @-> pfails
+      "recip 0" @| recip (0PPlutus' s => Term s PRational) @-> pfails
+      "1/(1-1)" @| ((1PPlutus' s => Term s PRational) / (1 - 1)) @-> pfails

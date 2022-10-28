@@ -100,7 +100,7 @@ instance PIsData (PMap keysort k v) where
 instance PEq (PMap 'Sorted k v) where
   x #== y = peqViaData # x # y
     where
-      peqViaData :: Term s (PMap 'Sorted k v :--> PMap 'Sorted k v :--> PBool)
+      peqViaDataPPlutus' s => Term s (PMap 'Sorted k v #-> PMap 'Sorted k v #-> PBool)
       peqViaData = phoistAcyclic $ plam $ \m0 m1 -> pdata m0 #== pdata m1
 
 instance
@@ -140,7 +140,7 @@ instance
     unwrapped <- tcont . plet $ List.pmap # ptryFromPair # opq'
     pure (punsafeCoerce opq, pcon . PMap $ unwrapped)
     where
-      ptryFromPair :: Term s (PBuiltinPair PData PData :--> PBuiltinPair (PAsData k) (PAsData v))
+      ptryFromPairPPlutus' s => Term s (PBuiltinPair PData PData #-> PBuiltinPair (PAsData k) (PAsData v))
       ptryFromPair = plam $ \p ->
         ppairDataBuiltin # ptryFrom (pfstBuiltin # p) fst
           # ptryFrom (psndBuiltin # p) fst
@@ -161,11 +161,11 @@ instance
     pure (punsafeCoerce opq, unwrapped)
 
 -- | Tests whether the map is empty.
-pnull :: Term s (PMap any k v :--> PBool)
+pnullPPlutus' s => Term s (PMap any k v #-> PBool)
 pnull = plam (\map -> List.pnull # pto map)
 
 -- | Look up the given key in a 'PMap'.
-plookup :: (PIsData k, PIsData v) => Term s (k :--> PMap any k v :--> PMaybe v)
+plookup :: (PIsData k, PIsData v) => Term s (k #-> PMap any k v #-> PMaybe v)
 plookup = phoistAcyclic $
   plam $ \key ->
     plookupDataWith
@@ -173,17 +173,17 @@ plookup = phoistAcyclic $
       # pdata key
 
 -- | Look up the given key data in a 'PMap'.
-plookupData :: Term s (PAsData k :--> PMap any k v :--> PMaybe (PAsData v))
+plookupDataPPlutus' s => Term s (PAsData k #-> PMap any k v #-> PMaybe (PAsData v))
 plookupData = plookupDataWith # phoistAcyclic (plam $ \pair -> pcon $ PJust $ psndBuiltin # pair)
 
 -- | Look up the given key data in a 'PMap', applying the given function to the found key-value pair.
 plookupDataWith ::
   Term
     s
-    ( (PBuiltinPair (PAsData k) (PAsData v) :--> PMaybe x)
-        :--> PAsData k
-        :--> PMap any k v
-        :--> PMaybe x
+    ( (PBuiltinPair (PAsData k) (PAsData v) #-> PMaybe x)
+        #-> PAsData k
+        #-> PMap any k v
+        #-> PMaybe x
     )
 plookupDataWith = phoistAcyclic $
   plam $ \unwrap key map ->
@@ -198,20 +198,20 @@ plookupDataWith = phoistAcyclic $
       # pto map
 
 -- | Look up the given key in a 'PMap', returning the default value if the key is absent.
-pfindWithDefault :: (PIsData k, PIsData v) => Term s (v :--> k :--> PMap any k v :--> v)
+pfindWithDefault :: (PIsData k, PIsData v) => Term s (v #-> k #-> PMap any k v #-> v)
 pfindWithDefault = phoistAcyclic $ plam $ \def key -> foldAtData # pdata key # def # plam pfromData
 
 {- | Look up the given key in a 'PMap'; return the default if the key is
  absent or apply the argument function to the value data if present.
 -}
-pfoldAt :: PIsData k => Term s (k :--> r :--> (PAsData v :--> r) :--> PMap any k v :--> r)
+pfoldAt :: PIsData k => Term s (k #-> r #-> (PAsData v #-> r) #-> PMap any k v #-> r)
 pfoldAt = phoistAcyclic $
   plam $ \key -> foldAtData # pdata key
 
 {- | Look up the given key data in a 'PMap'; return the default if the key is
  absent or apply the argument function to the value data if present.
 -}
-foldAtData :: Term s (PAsData k :--> r :--> (PAsData v :--> r) :--> PMap any k v :--> r)
+foldAtDataPPlutus' s => Term s (PAsData k #-> r #-> (PAsData v #-> r) #-> PMap any k v #-> r)
 foldAtData = phoistAcyclic $
   plam $ \key def apply map ->
     precList
@@ -225,7 +225,7 @@ foldAtData = phoistAcyclic $
       # pto map
 
 -- | Insert a new key/value pair into the map, overiding the previous if any.
-pinsert :: (POrd k, PIsData k, PIsData v) => Term s (k :--> v :--> PMap 'Sorted k v :--> PMap 'Sorted k v)
+pinsert :: (POrd k, PIsData k, PIsData v) => Term s (k #-> v #-> PMap 'Sorted k v #-> PMap 'Sorted k v)
 pinsert = phoistAcyclic $
   plam $ \key val ->
     rebuildAtKey # plam (pcons # (ppairDataBuiltin # pdata key # pdata val) #) # key
@@ -233,13 +233,13 @@ pinsert = phoistAcyclic $
 -- | Insert a new data-encoded key/value pair into the map, overiding the previous if any.
 pinsertData ::
   (POrd k, PIsData k) =>
-  Term s (PAsData k :--> PAsData v :--> PMap 'Sorted k v :--> PMap 'Sorted k v)
+  Term s (PAsData k #-> PAsData v #-> PMap 'Sorted k v #-> PMap 'Sorted k v)
 pinsertData = phoistAcyclic $
   plam $ \key val ->
     rebuildAtKey # plam (pcons # (ppairDataBuiltin # key # val) #) # pfromData key
 
 -- | Delete a key from the map.
-pdelete :: (POrd k, PIsData k) => Term s (k :--> PMap 'Sorted k v :--> PMap 'Sorted k v)
+pdelete :: (POrd k, PIsData k) => Term s (k #-> PMap 'Sorted k v #-> PMap 'Sorted k v)
 pdelete = rebuildAtKey # plam id
 
 -- | Rebuild the map at the given key.
@@ -248,11 +248,11 @@ rebuildAtKey ::
   Term
     s
     ( ( PBuiltinList (PBuiltinPair (PAsData k) (PAsData v))
-          :--> PBuiltinList (PBuiltinPair (PAsData k) (PAsData v))
+          #-> PBuiltinList (PBuiltinPair (PAsData k) (PAsData v))
       )
-        :--> k
-        :--> PMap g k v
-        :--> PMap g k v
+        #-> k
+        #-> PMap g k v
+        #-> PMap g k v
     )
 rebuildAtKey = phoistAcyclic $
   plam $ \handler key map ->
@@ -275,24 +275,24 @@ rebuildAtKey = phoistAcyclic $
         # plam id
 
 -- | Construct an empty 'PMap'.
-pempty :: Term s (PMap 'Sorted k v)
+pemptyPPlutus' s => Term s (PMap 'Sorted k v)
 pempty = punsafeDowncast pnil
 
 -- | Construct a singleton 'PMap' with the given key and value.
-psingleton :: (PIsData k, PIsData v) => Term s (k :--> v :--> PMap 'Sorted k v)
+psingleton :: (PIsData k, PIsData v) => Term s (k #-> v #-> PMap 'Sorted k v)
 psingleton = phoistAcyclic $ plam $ \key value -> psingletonData # pdata key # pdata value
 
 -- | Construct a singleton 'PMap' with the given data-encoded key and value.
-psingletonData :: Term s (PAsData k :--> PAsData v :--> PMap 'Sorted k v)
+psingletonDataPPlutus' s => Term s (PAsData k #-> PAsData v #-> PMap 'Sorted k v)
 psingletonData = phoistAcyclic $
   plam $ \key value -> punsafeDowncast (pcons # (ppairDataBuiltin # key # value) # pnil)
 
 -- | Construct a 'PMap' from a list of key-value pairs, sorted by ascending key data.
-pfromAscList :: (POrd k, PIsData k, PIsData v) => Term s (PBuiltinListOfPairs k v :--> PMap 'Sorted k v)
+pfromAscList :: (POrd k, PIsData k, PIsData v) => Term s (PBuiltinListOfPairs k v #-> PMap 'Sorted k v)
 pfromAscList = plam $ (passertSorted #) . pcon . PMap
 
 -- | Assert the map is properly sorted.
-passertSorted :: forall k v any s. (POrd k, PIsData k, PIsData v) => Term s (PMap any k v :--> PMap 'Sorted k v)
+passertSorted :: forall k v any s. (POrd k, PIsData k, PIsData v) => Term s (PMap any k v #-> PMap 'Sorted k v)
 passertSorted =
   let _ = witness (Proxy :: Proxy (PIsData v))
    in phoistAcyclic $
@@ -313,7 +313,7 @@ passertSorted =
             # plam (const $ pcon PFalse)
 
 -- | Forget the knowledge that keys were sorted.
-pforgetSorted :: Term s (PMap 'Sorted k v) -> Term s (PMap g k v)
+pforgetSortedPPlutus' s => Term s (PMap 'Sorted k v) -> Term s (PMap g k v)
 pforgetSorted v = punsafeDowncast (pto v)
 
 {- | Given a 'Foldable' of key-value pairs, construct an unsorted 'PMap'.
@@ -407,21 +407,21 @@ instance
 -}
 punionWith ::
   (POrd k, PIsData k, PIsData v) =>
-  Term s ((v :--> v :--> v) :--> PMap 'Sorted k v :--> PMap 'Sorted k v :--> PMap 'Sorted k v)
+  Term s ((v #-> v #-> v) #-> PMap 'Sorted k v #-> PMap 'Sorted k v #-> PMap 'Sorted k v)
 punionWith = phoistAcyclic $
   plam $
     \combine -> punionWithData #$ plam $
       \x y -> pdata (combine # pfromData x # pfromData y)
 
 data MapUnionCarrier k v s = MapUnionCarrier
-  { merge :: Term s (PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v)
-  , mergeInsert :: Term s (PBuiltinPair (PAsData k) (PAsData v) :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v :--> PBuiltinListOfPairs k v)
+  { mergePPlutus' s => Term s (PBuiltinListOfPairs k v #-> PBuiltinListOfPairs k v #-> PBuiltinListOfPairs k v)
+  , mergeInsertPPlutus' s => Term s (PBuiltinPair (PAsData k) (PAsData v) #-> PBuiltinListOfPairs k v #-> PBuiltinListOfPairs k v #-> PBuiltinListOfPairs k v)
   }
   deriving stock (Generic)
   deriving anyclass (PlutusType)
 instance DerivePlutusType (MapUnionCarrier k v) where type DPTStrat _ = PlutusTypeScott
 
-mapUnionCarrier :: (POrd k, PIsData k) => Term s ((PAsData v :--> PAsData v :--> PAsData v) :--> MapUnionCarrier k v :--> MapUnionCarrier k v)
+mapUnionCarrier :: (POrd k, PIsData k) => Term s ((PAsData v #-> PAsData v #-> PAsData v) #-> MapUnionCarrier k v #-> MapUnionCarrier k v)
 mapUnionCarrier = phoistAcyclic $ plam \combine self ->
   let mergeInsert = pmatch self \(MapUnionCarrier {mergeInsert}) -> mergeInsert
       merge = pmatch self \(MapUnionCarrier {merge}) -> merge
@@ -458,8 +458,8 @@ mapUnionCarrier = phoistAcyclic $ plam \combine self ->
                           )
           }
 
-mapUnion :: forall k v s. (POrd k, PIsData k) => Term s ((PAsData v :--> PAsData v :--> PAsData v) :--> MapUnionCarrier k v)
-mapUnion = phoistAcyclic $ plam \combine -> punsafeCoerce pfix # (mapUnionCarrier # combine :: Term _ (MapUnionCarrier k v :--> MapUnionCarrier k v))
+mapUnion :: forall k v s. (POrd k, PIsData k) => Term s ((PAsData v #-> PAsData v #-> PAsData v) #-> MapUnionCarrier k v)
+mapUnion = phoistAcyclic $ plam \combine -> punsafeCoerce pfix # (mapUnionCarrier # combine :: Term _ (MapUnionCarrier k v #-> MapUnionCarrier k v))
 
 {- | Combine two 'PMap's applying the given function to any two data-encoded
  values that share the same key.
@@ -468,17 +468,17 @@ punionWithData ::
   (POrd k, PIsData k) =>
   Term
     s
-    ( (PAsData v :--> PAsData v :--> PAsData v)
-        :--> PMap 'Sorted k v
-        :--> PMap 'Sorted k v
-        :--> PMap 'Sorted k v
+    ( (PAsData v #-> PAsData v #-> PAsData v)
+        #-> PMap 'Sorted k v
+        #-> PMap 'Sorted k v
+        #-> PMap 'Sorted k v
     )
 punionWithData = phoistAcyclic $
   plam $ \combine x y ->
     pcon $ PMap $ (pmatch (mapUnion # combine) \(MapUnionCarrier {merge}) -> merge) # pto x # pto y
 
 -- | Difference of two maps. Return elements of the first map not existing in the second map.
-pdifference :: PIsData k => Term s (PMap g k a :--> PMap any k b :--> PMap g k a)
+pdifference :: PIsData k => Term s (PMap g k a #-> PMap any k b #-> PMap g k a)
 pdifference = phoistAcyclic $
   plam $ \left right ->
     pcon . PMap $
@@ -495,19 +495,19 @@ pdifference = phoistAcyclic $
         # pto left
 
 -- | Tests if all values in the map satisfy the given predicate.
-pall :: PIsData v => Term s ((v :--> PBool) :--> PMap any k v :--> PBool)
+pall :: PIsData v => Term s ((v #-> PBool) #-> PMap any k v #-> PBool)
 pall = phoistAcyclic $
   plam $ \pred map ->
     List.pall # plam (\pair -> pred #$ pfromData $ psndBuiltin # pair) # pto map
 
 -- | Tests if anu value in the map satisfies the given predicate.
-pany :: PIsData v => Term s ((v :--> PBool) :--> PMap any k v :--> PBool)
+pany :: PIsData v => Term s ((v #-> PBool) #-> PMap any k v #-> PBool)
 pany = phoistAcyclic $
   plam $ \pred map ->
     List.pany # plam (\pair -> pred #$ pfromData $ psndBuiltin # pair) # pto map
 
 -- | Filters the map so it contains only the values that satisfy the given predicate.
-pfilter :: PIsData v => Term s ((v :--> PBool) :--> PMap g k v :--> PMap g k v)
+pfilter :: PIsData v => Term s ((v #-> PBool) #-> PMap g k v #-> PMap g k v)
 pfilter = phoistAcyclic $
   plam $ \pred ->
     pmapMaybe #$ plam $ \v -> pif (pred # v) (pcon $ PJust v) (pcon PNothing)
@@ -515,14 +515,14 @@ pfilter = phoistAcyclic $
 -- | Maps and filters the map, much like 'Data.List.mapMaybe'.
 pmapMaybe ::
   (PIsData a, PIsData b) =>
-  Term s ((a :--> PMaybe b) :--> PMap g k a :--> PMap g k b)
+  Term s ((a #-> PMaybe b) #-> PMap g k a #-> PMap g k b)
 pmapMaybe = phoistAcyclic $
   plam $ \f -> pmapMaybeData #$ plam $ \v -> pmatch (f # pfromData v) $ \case
     PNothing -> pcon PNothing
     PJust v' -> pcon $ PJust (pdata v')
 
 pmapMaybeData ::
-  Term s ((PAsData a :--> PMaybe (PAsData b)) :--> PMap g k a :--> PMap g k b)
+  Term s ((PAsData a #-> PMaybe (PAsData b)) #-> PMap g k a #-> PMap g k b)
 pmapMaybeData = phoistAcyclic $
   plam $ \f map ->
     pcon . PMap $
@@ -539,12 +539,12 @@ pmapMaybeData = phoistAcyclic $
 -- | Applies a function to every value in the map, much like 'Data.List.map'.
 pmap ::
   (PIsData a, PIsData b) =>
-  Term s ((a :--> b) :--> PMap g k a :--> PMap g k b)
+  Term s ((a #-> b) #-> PMap g k a #-> PMap g k b)
 pmap = phoistAcyclic $
   plam $ \f -> pmapData #$ plam $ \v -> pdata (f # pfromData v)
 
 pmapData ::
-  Term s ((PAsData a :--> PAsData b) :--> PMap g k a :--> PMap g k b)
+  Term s ((PAsData a #-> PAsData b) #-> PMap g k a #-> PMap g k b)
 pmapData = phoistAcyclic $
   plam $ \f map ->
     pcon . PMap $
@@ -567,11 +567,11 @@ pcheckBinRel ::
   (POrd k, PIsData k, PIsData v) =>
   Term
     s
-    ( (v :--> v :--> PBool)
-        :--> v
-        :--> PMap 'Sorted k v
-        :--> PMap 'Sorted k v
-        :--> PBool
+    ( (v #-> v #-> PBool)
+        #-> v
+        #-> PMap 'Sorted k v
+        #-> PMap 'Sorted k v
+        #-> PBool
     )
 pcheckBinRel = phoistAcyclic $
   plam $ \f z m1 m2 ->

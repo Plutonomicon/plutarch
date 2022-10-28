@@ -32,7 +32,7 @@ import Plutarch (
   runTermCont,
   (#),
   (#$),
-  type (:-->),
+  type (#->),
  )
 import Plutarch.Bool (PEq, POrd, PPartialOrd, pif, (#<), (#<=), (#==))
 import Plutarch.Builtin (
@@ -60,9 +60,9 @@ import Plutarch.TryFrom (PTryFrom (PTryFromExcess, ptryFrom'), ptryFrom)
 import Plutarch.Unsafe (punsafeCoerce, punsafeDowncast)
 
 class PFractional (a :: PType) where
-  (#/) :: Term s a -> Term s a -> Term s a
-  precip :: Term s (a :--> a)
-  pfromRational :: Term s (PRational :--> a)
+  (#/)PPlutus' s => Term s a -> Term s a -> Term s a
+  precipPPlutus' s => Term s (a #-> a)
+  pfromRationalPPlutus' s => Term s (PRational #-> a)
 
 -- | Note: This type is _not_ the synonym of 'PlutusTx.Rational'.
 data PRational s
@@ -104,7 +104,7 @@ instance PShow PRational where
 instance PIsData PRational where
   pfromDataImpl x' = phoistAcyclic (plam $ \x -> plistToRat #$ pasList # pforgetData x) # x'
     where
-      plistToRat :: Term s (PBuiltinList PData :--> PRational)
+      plistToRatPPlutus' s => Term s (PBuiltinList PData #-> PRational)
       plistToRat = plam $ \x ->
         pcon $
           PRational (pasInt #$ phead # x)
@@ -250,7 +250,7 @@ instance PFractional PRational where
 
   pfromRational = phoistAcyclic $ plam id
 
-preduce :: Term s (PRational :--> PRational)
+preducePPlutus' s => Term s (PRational #-> PRational)
 preduce = phoistAcyclic $
   plam $ \x -> unTermCont $ do
     PRational xn xd' <- tcont $ pmatch x
@@ -259,7 +259,7 @@ preduce = phoistAcyclic $
     s <- tcont . plet $ psignum # xd
     pure . pcon $ PRational (s * pdiv # xn # r) $ punsafeDowncast $ s * pdiv # xd # r
 
-pgcd :: Term s (PInteger :--> PInteger :--> PInteger)
+pgcdPPlutus' s => Term s (PInteger #-> PInteger #-> PInteger)
 pgcd = phoistAcyclic $
   plam $ \x' y' -> unTermCont $ do
     x <- tcont . plet $ pabs # x'
@@ -267,7 +267,7 @@ pgcd = phoistAcyclic $
     pure $ pgcd' # (pmax # x # y) #$ pmin # x # y
 
 -- assumes inputs are non negative and a >= b
-pgcd' :: Term s (PInteger :--> PInteger :--> PInteger)
+pgcd'PPlutus' s => Term s (PInteger #-> PInteger #-> PInteger)
 pgcd' = phoistAcyclic $ pfix #$ plam $ f
   where
     f self a b =
@@ -276,22 +276,22 @@ pgcd' = phoistAcyclic $ pfix #$ plam $ f
         a
         $ self # b #$ pmod # a # b
 
-pmin :: POrd a => Term s (a :--> a :--> a)
+pmin :: POrd a => Term s (a #-> a #-> a)
 pmin = phoistAcyclic $ plam $ \a b -> pif (a #<= b) a b
 
-pmax :: POrd a => Term s (a :--> a :--> a)
+pmax :: POrd a => Term s (a #-> a #-> a)
 pmax = phoistAcyclic $ plam $ \a b -> pif (a #<= b) b a
 
-pnumerator :: Term s (PRational :--> PInteger)
+pnumeratorPPlutus' s => Term s (PRational #-> PInteger)
 pnumerator = phoistAcyclic $ plam $ \x -> pmatch x $ \(PRational n _) -> n
 
-pdenominator :: Term s (PRational :--> PPositive)
+pdenominatorPPlutus' s => Term s (PRational #-> PPositive)
 pdenominator = phoistAcyclic $ plam $ \x -> pmatch x $ \(PRational _ d) -> d
 
-pfromInteger :: Term s (PInteger :--> PRational)
+pfromIntegerPPlutus' s => Term s (PInteger #-> PRational)
 pfromInteger = phoistAcyclic $ plam $ \n -> pcon $ PRational n 1
 
-pround :: Term s (PRational :--> PInteger)
+proundPPlutus' s => Term s (PRational #-> PInteger)
 pround = phoistAcyclic $
   plam $ \x -> unTermCont $ do
     PRational a' b' <- tcont $ pmatch x
@@ -309,7 +309,7 @@ pround = phoistAcyclic $
               (pif (rem #< pdiv # pto b # 2) 0 1)
     pure $ base + result
 
-ptruncate :: Term s (PRational :--> PInteger)
+ptruncatePPlutus' s => Term s (PRational #-> PInteger)
 ptruncate = phoistAcyclic $
   plam $ \x -> unTermCont $ do
     PRational a' b' <- tcont $ pmatch x
@@ -322,7 +322,7 @@ ptruncate = phoistAcyclic $
         q
         (q + pif (pmod # a # pto b #== 0) 0 1)
 
-pproperFraction :: Term s (PRational :--> PPair PInteger PRational)
+pproperFractionPPlutus' s => Term s (PRational #-> PPair PInteger PRational)
 pproperFraction = phoistAcyclic $
   plam $ \x ->
     plet (ptruncate # x) $ \q ->

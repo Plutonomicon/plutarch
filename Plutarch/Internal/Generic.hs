@@ -72,3 +72,4 @@ gpto :: forall a s. PGeneric a => SOP (Term s) (PCode a) -> a s
 -- Depends on `All` constraint above.
 gpto x = case (Dict :: Dict (PGeneric' a s)) of
   Dict -> gto (unsafeCoerce x :: SOP I (GCode (a s)))
+

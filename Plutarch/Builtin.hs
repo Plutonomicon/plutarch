@@ -58,7 +58,7 @@ import Plutarch (
   pto,
   (#),
   (#$),
-  type (:-->),
+  type (#->),
  )
 import Plutarch.Bool (PBool (..), PEq, pif, pif', (#&&), (#==))
 import Plutarch.ByteString (PByteString)
@@ -129,17 +129,17 @@ instance (PConstant a, PConstant b) => PConstantDecl (a, b) where
     y' <- pconstantFromRepr @b y
     Just (x', y')
 
-pfstBuiltin :: Term s (PBuiltinPair a b :--> a)
+pfstBuiltinPPlutus' s => Term s (PBuiltinPair a b #-> a)
 pfstBuiltin = phoistAcyclic $ pforce . pforce . punsafeBuiltin $ PLC.FstPair
 
-psndBuiltin :: Term s (PBuiltinPair a b :--> b)
+psndBuiltinPPlutus' s => Term s (PBuiltinPair a b #-> b)
 psndBuiltin = phoistAcyclic $ pforce . pforce . punsafeBuiltin $ PLC.SndPair
 
 {- | Construct a builtin pair of 'PData' elements.
 
 Uses 'PAsData' to preserve more information about the underlying 'PData'.
 -}
-ppairDataBuiltin :: Term s (PAsData a :--> PAsData b :--> PBuiltinPair (PAsData a) (PAsData b))
+ppairDataBuiltinPPlutus' s => Term s (PAsData a #-> PAsData b #-> PBuiltinPair (PAsData a) (PAsData b))
 ppairDataBuiltin = punsafeBuiltin PLC.MkPairData
 
 -- | Plutus 'BuiltinList'
@@ -150,19 +150,19 @@ data PBuiltinList (a :: PType) (s :: S)
 instance (PShow a, PLift a) => PShow (PBuiltinList a) where
   pshow' _ x = pshowList @PBuiltinList @a # x
 
-pheadBuiltin :: Term s (PBuiltinList a :--> a)
+pheadBuiltinPPlutus' s => Term s (PBuiltinList a #-> a)
 pheadBuiltin = phoistAcyclic $ pforce $ punsafeBuiltin PLC.HeadList
 
-ptailBuiltin :: Term s (PBuiltinList a :--> PBuiltinList a)
+ptailBuiltinPPlutus' s => Term s (PBuiltinList a #-> PBuiltinList a)
 ptailBuiltin = phoistAcyclic $ pforce $ punsafeBuiltin PLC.TailList
 
-pchooseListBuiltin :: Term s (PBuiltinList a :--> b :--> b :--> b)
+pchooseListBuiltinPPlutus' s => Term s (PBuiltinList a #-> b #-> b #-> b)
 pchooseListBuiltin = phoistAcyclic $ pforce $ pforce $ punsafeBuiltin PLC.ChooseList
 
-pnullBuiltin :: Term s (PBuiltinList a :--> PBool)
+pnullBuiltinPPlutus' s => Term s (PBuiltinList a #-> PBool)
 pnullBuiltin = phoistAcyclic $ pforce $ punsafeBuiltin PLC.NullList
 
-pconsBuiltin :: Term s (a :--> PBuiltinList a :--> PBuiltinList a)
+pconsBuiltinPPlutus' s => Term s (a #-> PBuiltinList a #-> PBuiltinList a)
 pconsBuiltin = phoistAcyclic $ pforce $ punsafeBuiltin PLC.MkCons
 
 instance PConstant a => PConstantDecl [a] where
@@ -223,7 +223,7 @@ instance PShow PData where
   pshow' b t0 = wrap (go0 # t0)
     where
       wrap s = pif (pconstant b) ("(" <> s <> ")") s
-      go0 :: Term s (PData :--> PString)
+      go0PPlutus' s => Term s (PData #-> PString)
       go0 = phoistAcyclic $
         pfix #$ plam $ \go t ->
           let pshowConstr pp0 = plet pp0 $ \pp ->
@@ -244,7 +244,7 @@ instance PShow PData where
                   "["
                     <> pelimList
                       ( \x0 xs0 ->
-                          x0 <> (pfoldr' (\x r -> ", " <> x <> r) # ("" :: Term s PString) # xs0)
+                          x0 <> (pfoldr' (\x r -> ", " <> x <> r) # (""PPlutus' s => Term s PString) # xs0)
                       )
                       ""
                       plist
@@ -272,29 +272,29 @@ deriving via (DerivePConstantDirect Data PData) instance PConstantDecl Data
 instance PEq PData where
   x #== y = punsafeBuiltin PLC.EqualsData # x # y
 
-pchooseData :: Term s (PData :--> a :--> a :--> a :--> a :--> a :--> a)
+pchooseDataPPlutus' s => Term s (PData #-> a #-> a #-> a #-> a #-> a #-> a)
 pchooseData = phoistAcyclic $ pforce $ punsafeBuiltin PLC.ChooseData
 
-pasConstr :: Term s (PData :--> PBuiltinPair PInteger (PBuiltinList PData))
+pasConstrPPlutus' s => Term s (PData #-> PBuiltinPair PInteger (PBuiltinList PData))
 pasConstr = punsafeBuiltin PLC.UnConstrData
 
-pasMap :: Term s (PData :--> PBuiltinList (PBuiltinPair PData PData))
+pasMapPPlutus' s => Term s (PData #-> PBuiltinList (PBuiltinPair PData PData))
 pasMap = punsafeBuiltin PLC.UnMapData
 
-plistData :: Term s (PBuiltinList PData :--> PData)
+plistDataPPlutus' s => Term s (PBuiltinList PData #-> PData)
 plistData = punsafeBuiltin PLC.ListData
 
-pasList :: Term s (PData :--> PBuiltinList PData)
+pasListPPlutus' s => Term s (PData #-> PBuiltinList PData)
 pasList = punsafeBuiltin PLC.UnListData
 
-pasInt :: Term s (PData :--> PInteger)
+pasIntPPlutus' s => Term s (PData #-> PInteger)
 pasInt = punsafeBuiltin PLC.UnIData
 
-pasByteStr :: Term s (PData :--> PByteString)
+pasByteStrPPlutus' s => Term s (PData #-> PByteString)
 pasByteStr = punsafeBuiltin PLC.UnBData
 
 -- | Serialise any builtin data to its cbor represented by a builtin bytestring
-pserialiseData :: Term s (PData :--> PByteString)
+pserialiseDataPPlutus' s => Term s (PData #-> PByteString)
 pserialiseData = punsafeBuiltin PLC.SerialiseData
 
 {-# DEPRECATED pdataLiteral "Use `pconstant` instead." #-}
@@ -351,11 +351,11 @@ prememberData' Proxy = let _ = witness (Proxy @(PSubtype PData a, PVariant p)) i
  - pfromDataImpl . punsafeDowncast . pdataImpl ≡ id
 -}
 class PIsData a where
-  pfromDataImpl :: Term s (PAsData a) -> Term s a
+  pfromDataImplPPlutus' s => Term s (PAsData a) -> Term s a
   default pfromDataImpl :: PIsData (PInner a) => Term s (PAsData a) -> Term s a
   pfromDataImpl x = punsafeDowncast $ pfromDataImpl (punsafeCoerce x :: Term _ (PAsData (PInner a)))
 
-  pdataImpl :: Term s a -> Term s PData
+  pdataImplPPlutus' s => Term s a -> Term s PData
   default pdataImpl :: PIsData (PInner a) => Term s a -> Term s PData
   pdataImpl x = pdataImpl $ pto x
 
@@ -394,19 +394,19 @@ instance PIsData PBool where
   pfromDataImpl x =
     phoistAcyclic (plam toBool) # pforgetData x
     where
-      toBool :: Term s PData -> Term s PBool
+      toBoolPPlutus' s => Term s PData -> Term s PBool
       toBool d = pfstBuiltin # (pasConstr # d) #== 1
 
   pdataImpl x =
     phoistAcyclic (plam toData) # x
     where
-      toData :: Term s PBool -> Term s PData
+      toDataPPlutus' s => Term s PBool -> Term s PData
       toData b =
         punsafeBuiltin PLC.ConstrData
-          # (pif' # b # 1 # (0 :: Term s PInteger))
+          # (pif' # b # 1 # (0PPlutus' s => Term s PInteger))
           # nil
 
-      nil :: Term s (PBuiltinList PData)
+      nilPPlutus' s => Term s (PBuiltinList PData)
       nil = pnil
 
 -- | NB: `PAsData (PBuiltinPair (PAsData a) (PAsData b))` and `PAsData (PTuple a b)` have the same representation.
@@ -436,17 +436,17 @@ instance DerivePlutusType (Helper4 f b a) where type DPTStrat _ = PlutusTypeNewt
 instance PIsData (PBuiltinPair PData PData) where
   pfromDataImpl = f . pfromData . g
     where
-      g :: Term s (PAsData (PBuiltinPair PData PData)) -> Term s (PAsData (PBuiltinPair (PAsData PData) (PAsData PData)))
+      gPPlutus' s => Term s (PAsData (PBuiltinPair PData PData)) -> Term s (PAsData (PBuiltinPair (PAsData PData) (PAsData PData)))
       g x = pto $ prememberData (Proxy @(Helper3 PBuiltinPair (PAsData PData))) $ pcon $ Helper3 $ pto $ prememberData (Proxy @(Helper2 (PBuiltinPair PData))) $ pcon $ Helper2 x
 
-      f :: Term s (PBuiltinPair (PAsData PData) (PAsData PData)) -> Term s (PBuiltinPair PData PData)
+      fPPlutus' s => Term s (PBuiltinPair (PAsData PData) (PAsData PData)) -> Term s (PBuiltinPair PData PData)
       f x = pto $ pforgetData' (Proxy @(Helper4 PBuiltinPair PData)) $ pcon $ Helper4 $ pforgetData' @PData (Proxy @(PBuiltinPair (PAsData PData))) x
   pdataImpl = pupcast . f . pdata . g
     where
-      g :: Term s (PBuiltinPair PData PData) -> Term s (PBuiltinPair (PAsData PData) (PAsData PData))
+      gPPlutus' s => Term s (PBuiltinPair PData PData) -> Term s (PBuiltinPair (PAsData PData) (PAsData PData))
       g x = pto $ prememberData (Proxy @(Helper4 PBuiltinPair (PAsData PData))) $ pcon $ Helper4 $ prememberData (Proxy @(PBuiltinPair PData)) x
 
-      f :: Term s (PAsData (PBuiltinPair (PAsData PData) (PAsData PData))) -> Term s (PAsData (PBuiltinPair PData PData))
+      fPPlutus' s => Term s (PAsData (PBuiltinPair (PAsData PData) (PAsData PData))) -> Term s (PAsData (PBuiltinPair PData PData))
       f x = pto $ pforgetData' @PData (Proxy @(Helper3 PBuiltinPair PData)) $ pcon $ Helper3 $ pto $ pforgetData' @PData (Proxy @(Helper2 (PBuiltinPair (PAsData PData)))) $ pcon $ Helper2 x
 
 instance (PShow a, PShow b) => PShow (PBuiltinPair a b) where
@@ -470,7 +470,7 @@ instance PEq (PAsData a) where
 instance (PIsData a, PShow a) => PShow (PAsData a) where
   pshow' w x = pshow' w (pfromData x)
 
-pconstrBuiltin :: Term s (PInteger :--> PBuiltinList PData :--> PAsData (PBuiltinPair PInteger (PBuiltinList PData)))
+pconstrBuiltinPPlutus' s => Term s (PInteger #-> PBuiltinList PData #-> PAsData (PBuiltinPair PInteger (PBuiltinList PData)))
 pconstrBuiltin = punsafeBuiltin PLC.ConstrData
 
 {- | Create a Plutarch-level 'PAsData' constant, from a Haskell value.
@@ -520,7 +520,7 @@ instance
   ptryFrom' opq = runTermCont $ do
     let lst :: Term _ (PBuiltinList PData)
         lst = pasList # opq
-        verify :: Term _ (PData :--> PAsData a)
+        verify :: Term _ (PData #-> PAsData a)
         verify = plam $ \e ->
           unTermCont $ do
             (wrapped, _) <- tcont $ ptryFrom @(PAsData a) $ e

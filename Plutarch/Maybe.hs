@@ -16,7 +16,7 @@ import Plutarch (
   phoistAcyclic,
   plam,
   pmatch,
-  type (:-->),
+  type (#->),
  )
 import Plutarch.Bool (PEq)
 import Plutarch.Show (PShow)
@@ -33,7 +33,7 @@ instance DerivePlutusType (PMaybe a) where type DPTStrat _ = PlutusTypeScott
 {- |
  fallible unwrapping from @PMaybe@
 -}
-pfromJust :: Term s (PMaybe a :--> a)
+pfromJustPPlutus' s => Term s (PMaybe a #-> a)
 pfromJust = phoistAcyclic $
   plam $ \maybe -> pmatch maybe $ \case
     PNothing -> perror

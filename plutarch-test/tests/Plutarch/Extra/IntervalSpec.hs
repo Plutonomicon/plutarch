@@ -29,15 +29,15 @@ spec :: Spec
 spec = do
   describe "extra.intervalutils" $ do
     describe "fixtures" $ do
-      let i1 :: Term s (PInterval PInteger)
+      let i1PPlutus' s => Term s (PInterval PInteger)
           i1 = mkInterval 1 2
-          i2 :: Term s (PInterval PInteger)
+          i2PPlutus' s => Term s (PInterval PInteger)
           i2 = mkInterval 3 5
-          i3 :: Term s (PInterval PInteger)
+          i3PPlutus' s => Term s (PInterval PInteger)
           i3 = mkInterval 2 4
-          i4 :: Term s (PInterval PInteger)
+          i4PPlutus' s => Term s (PInterval PInteger)
           i4 = mkInterval 4 4
-          i5 :: Term s (PInterval PInteger)
+          i5PPlutus' s => Term s (PInterval PInteger)
           i5 = mkInterval 3 4
       pgoldenSpec $ do
         "constants" @\ do
@@ -55,7 +55,7 @@ spec = do
           "[b,c], a = c" @| pmember # pconstantData 4 # i3 @-> passert
           "[b,c], a > c" @| pmember # pconstantData 5 # i3 @-> passertNot
         "hull" @\ do
-          let theHull :: Term s (PInterval PInteger)
+          let theHullPPlutus' s => Term s (PInterval PInteger)
               theHull = phull # (psingleton # pconstantData 3) # (psingleton # pconstantData 5)
           "hull 3 5 contains 3 5" @| pcontains # theHull # i2 @-> passert
           "2 not member of hull 3 5" @| pmember # pconstantData 2 # theHull @-> passertNot
@@ -156,7 +156,7 @@ prop_after = property $ do
 checkMember :: Integer -> Integer -> Integer -> Bool
 checkMember a b c = actual == expected
   where
-    i :: Term s (PInterval PInteger)
+    iPPlutus' s => Term s (PInterval PInteger)
     i = mkInterval b c
 
     actual = plift $ pmember # pconstantData a # i
@@ -165,45 +165,45 @@ checkMember a b c = actual == expected
 checkAlways :: Integer -> Integer -> Bool
 checkAlways a b = plift $ pcontains # palways # i
   where
-    i :: Term s (PInterval PInteger)
+    iPPlutus' s => Term s (PInterval PInteger)
     i = mkInterval a b
 
 checkNever :: Integer -> Integer -> Bool
 checkNever a b = not (plift $ pcontains # pnever # i)
   where
-    i :: Term s (PInterval PInteger)
+    iPPlutus' s => Term s (PInterval PInteger)
     i = mkInterval a b
 
 checkHull :: Integer -> Integer -> Integer -> Integer -> Bool
 checkHull a b c d = plift $ (pcontains # i3 # i1) #&& (pcontains # i3 # i2)
   where
-    i1 :: Term s (PInterval PInteger)
+    i1PPlutus' s => Term s (PInterval PInteger)
     i1 = mkInterval a b
 
-    i2 :: Term s (PInterval PInteger)
+    i2PPlutus' s => Term s (PInterval PInteger)
     i2 = mkInterval c d
 
-    i3 :: Term s (PInterval PInteger)
+    i3PPlutus' s => Term s (PInterval PInteger)
     i3 = phull # i1 # i2
 
 checkIntersection :: Integer -> Integer -> Integer -> Integer -> Bool
 checkIntersection a b c d = plift $ (pcontains # i1 # i3) #&& (pcontains # i2 # i3)
   where
-    i1 :: Term s (PInterval PInteger)
+    i1PPlutus' s => Term s (PInterval PInteger)
     i1 = mkInterval a b
 
-    i2 :: Term s (PInterval PInteger)
+    i2PPlutus' s => Term s (PInterval PInteger)
     i2 = mkInterval c d
 
-    i3 :: Term s (PInterval PInteger)
+    i3PPlutus' s => Term s (PInterval PInteger)
     i3 = pintersection # i1 # i2
 
 checkBoundedContains :: Integer -> Integer -> Integer -> Integer -> Bool
 checkBoundedContains a b c d = actual == expected
   where
-    i1 :: Term s (PInterval PInteger)
+    i1PPlutus' s => Term s (PInterval PInteger)
     i1 = mkInterval a b
-    i2 :: Term s (PInterval PInteger)
+    i2PPlutus' s => Term s (PInterval PInteger)
     i2 = mkInterval c d
 
     expected :: Bool
@@ -216,9 +216,9 @@ checkBoundedContains a b c d = actual == expected
 checkUnboundedUpperContains :: Integer -> Integer -> Integer -> Bool
 checkUnboundedUpperContains a b c = actual == expected
   where
-    i1 :: Term s (PInterval PInteger)
+    i1PPlutus' s => Term s (PInterval PInteger)
     i1 = pfrom # pconstantData a
-    i2 :: Term s (PInterval PInteger)
+    i2PPlutus' s => Term s (PInterval PInteger)
     i2 = mkInterval b c
 
     expected :: Bool
@@ -231,9 +231,9 @@ checkUnboundedUpperContains a b c = actual == expected
 checkUnboundedLowerContains :: Integer -> Integer -> Integer -> Bool
 checkUnboundedLowerContains a b c = actual == expected
   where
-    i1 :: Term s (PInterval PInteger)
+    i1PPlutus' s => Term s (PInterval PInteger)
     i1 = pto # pconstantData a
-    i2 :: Term s (PInterval PInteger)
+    i2PPlutus' s => Term s (PInterval PInteger)
     i2 = mkInterval b c
 
     expected :: Bool
@@ -246,7 +246,7 @@ checkUnboundedLowerContains a b c = actual == expected
 checkBefore :: Integer -> Integer -> Integer -> Bool
 checkBefore a b c = actual == expected
   where
-    i :: Term s (PInterval PInteger)
+    iPPlutus' s => Term s (PInterval PInteger)
     i = mkInterval b c
 
     expected :: Bool
@@ -259,7 +259,7 @@ checkBefore a b c = actual == expected
 checkAfter :: Integer -> Integer -> Integer -> Bool
 checkAfter a b c = actual == expected
   where
-    i :: Term s (PInterval PInteger)
+    iPPlutus' s => Term s (PInterval PInteger)
     i = mkInterval b c
 
     expected :: Bool

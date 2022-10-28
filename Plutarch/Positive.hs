@@ -28,7 +28,7 @@ import Plutarch (
   pto,
   (#),
   (#$),
-  type (:-->),
+  type (#->),
  )
 import Plutarch.Num (PNum (pfromInteger, (#-)))
 import Plutarch.Show (PShow)
@@ -65,7 +65,7 @@ instance PTryFrom PData (PAsData PPositive) where
     pure (resData, res)
 
 -- | Build a 'PPositive' from a 'PInteger'. Yields 'PNothing' if argument is zero.
-ppositive :: Term s (PInteger :--> PMaybe PPositive)
+ppositivePPlutus' s => Term s (PInteger #-> PMaybe PPositive)
 ppositive = phoistAcyclic $
   plam $ \i ->
     pif
@@ -74,7 +74,7 @@ ppositive = phoistAcyclic $
       $ pcon . PJust . pcon $ PPositive i
 
 -- | Partial version of 'PPositive'. Errors if argument is zero.
-ptryPositive :: Term s (PInteger :--> PPositive)
+ptryPositivePPlutus' s => Term s (PInteger #-> PPositive)
 ptryPositive = phoistAcyclic $
   plam $ \i ->
     pif

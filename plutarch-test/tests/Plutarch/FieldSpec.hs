@@ -97,19 +97,19 @@ mkTrip x y z =
       )
 
 -- | An example term
-tripA :: Term s (PTriplet PInteger)
+tripAPPlutus' s => Term s (PTriplet PInteger)
 tripA = mkTrip 150 750 100
 
 -- | Another
-tripB :: Term s (PTriplet PInteger)
+tripBPPlutus' s => Term s (PTriplet PInteger)
 tripB = mkTrip 50 10 40
 
 -- | Another
-tripC :: Term s (PTriplet PInteger)
+tripCPPlutus' s => Term s (PTriplet PInteger)
 tripC = mkTrip 1 8 1
 
 -- | Nested PTriplet
-tripTrip :: Term s (PTriplet (PTriplet PInteger))
+tripTripPPlutus' s => Term s (PTriplet (PTriplet PInteger))
 tripTrip = mkTrip tripA tripB tripC
 
 {- |
@@ -119,7 +119,7 @@ tripTrip = mkTrip tripA tripB tripC
   The fields in the 'HRec' can them be accessed with
   RecordDotSyntax.
 -}
-tripSum :: Term s ((PTriplet PInteger) :--> PInteger)
+tripSumPPlutus' s => Term s ((PTriplet PInteger) #-> PInteger)
 tripSum =
   plam $ \x -> pletFields @["x", "y", "z"] x $
     \fs ->
@@ -130,7 +130,7 @@ tripSum =
 {- |
    A subset of fields can be specified.
 -}
-tripYZ :: Term s ((PTriplet PInteger) :--> PInteger)
+tripYZPPlutus' s => Term s ((PTriplet PInteger) #-> PInteger)
 tripYZ =
   plam $ \x -> pletFields @["y", "z"] x $
     \fs ->
@@ -140,7 +140,7 @@ tripYZ =
   The ordering of fields specified is irrelevant,
   this is equivalent to 'tripYZ'.
 -}
-tripZY :: Term s ((PTriplet PInteger) :--> PInteger)
+tripZYPPlutus' s => Term s ((PTriplet PInteger) #-> PInteger)
 tripZY =
   plam $ \x -> pletFields @["z", "y"] x $
     \fs ->
@@ -152,10 +152,10 @@ tripZY =
   This should be used carefully - if more than one field is needed,
   'pletFields' is more efficient.
 -}
-by :: Term s PInteger
+byPPlutus' s => Term s PInteger
 by = pfield @"y" # tripB
 
-getY :: Term s (PTriplet PInteger :--> PAsData PInteger)
+getYPPlutus' s => Term s (PTriplet PInteger #-> PAsData PInteger)
 getY = pfield @"y"
 
 {- |
@@ -164,7 +164,7 @@ getY = pfield @"y"
   we can conveniently chain 'pletAllFields' & 'pfield' within
   nested structures:
 -}
-dotPlus :: Term s PInteger
+dotPlusPPlutus' s => Term s PInteger
 dotPlus =
   pletFields @["x", "y", "z"] tripTrip $ \ts ->
     pletFields @["x", "y", "z"] (ts.x) $ \a ->
@@ -190,7 +190,7 @@ type SomeFields =
    , "_9" ':= PInteger
    ]
 
-someFields :: Term s (PDataRecord SomeFields)
+someFieldsPPlutus' s => Term s (PDataRecord SomeFields)
 someFields =
   punsafeCoerce $
     pconstant $
@@ -199,19 +199,19 @@ someFields =
 {- |
   We can also bind over a 'PDataRecord' directly.
 -}
-nFields :: Term s (PDataRecord SomeFields :--> PInteger)
+nFieldsPPlutus' s => Term s (PDataRecord SomeFields #-> PInteger)
 nFields =
   plam $ \r -> pletFields @["_0", "_1"] r $ \fs ->
     pfromData fs._0
       + pfromData fs._1
 
-dropFields :: Term s (PDataRecord SomeFields :--> PInteger)
+dropFieldsPPlutus' s => Term s (PDataRecord SomeFields #-> PInteger)
 dropFields =
   plam $ \r -> pletFields @["_8", "_9"] r $ \fs ->
     pfromData fs._8
       + pfromData fs._9
 
-rangeFields :: Term s (PDataRecord SomeFields :--> PInteger)
+rangeFieldsPPlutus' s => Term s (PDataRecord SomeFields #-> PInteger)
 rangeFields =
   plam $ \r -> pletFields @["_5", "_6"] r $ \fs ->
     pfromData fs._5
@@ -221,7 +221,7 @@ rangeFields =
   'pletFields' makes it convenient to pick out
   any amount of desired fields, efficiently.
 -}
-letSomeFields :: Term s (PDataRecord SomeFields :--> PInteger)
+letSomeFieldsPPlutus' s => Term s (PDataRecord SomeFields #-> PInteger)
 letSomeFields =
   plam $ \r -> pletFields @["_3", "_4", "_7"] r $ \fs ->
     pfromData fs._3
@@ -231,7 +231,7 @@ letSomeFields =
 {- |
   Ordering of fields is irrelevant
 -}
-letSomeFields' :: Term s (PDataRecord SomeFields :--> PInteger)
+letSomeFields'PPlutus' s => Term s (PDataRecord SomeFields #-> PInteger)
 letSomeFields' =
   plam $ \r -> pletFields @["_7", "_3", "_4"] r $ \fs ->
     pfromData fs._3

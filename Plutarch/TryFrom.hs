@@ -37,7 +37,7 @@ type family PSubtype' (a :: PType) (b :: PType) :: PSubtypeRelation where
   PSubtype' a b = Helper a b (PInner b)
 
 {- | @PSubtype a b@ constitutes a subtyping relation between @a@ and @b@.
- This concretely means that `\(x :: Term s b) -> punsafeCoerce x :: Term s a`
+ This concretely means that `\(xPPlutus' s => Term s b) -> punsafeCoerce xPPlutus' s => Term s a`
  is legal and sound.
 
  You can not make an instance for this yourself.

@@ -30,8 +30,8 @@ spec = do
         "()" @| plam $ \_ -> pconstant ()
       "id" @| plam $ \x -> x
       "fun" @\ do
-        "lam+" @| plam $ \_ -> (plam (+) :: Term _ (PInteger :--> PInteger :--> PInteger))
-        "+" @| (plam (+) :: Term _ (PInteger :--> PInteger :--> PInteger))
+        "lam+" @| plam $ \_ -> (plam (+) :: Term _ (PInteger #-> PInteger #-> PInteger))
+        "+" @| (plam (+) :: Term _ (PInteger #-> PInteger #-> PInteger))
     "η-reduction-optimisations" @\ do
       "λx y. addInteger x y => addInteger"
         @| plam

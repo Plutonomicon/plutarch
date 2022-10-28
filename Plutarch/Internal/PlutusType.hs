@@ -102,11 +102,11 @@ instance (forall t. PCovariant'' t => PContravariant'' (a t)) => PContravariant 
 class (forall t. PVariant'' t => PVariant'' (a t)) => PVariant a
 instance (forall t. PVariant'' t => PVariant'' (a t)) => PVariant a
 
-instance PlutusType (a :--> b) where
-  type PInner (a :--> b) = a :--> b
-  type PCovariant' (a :--> b) = (PContravariant' a, PCovariant' b)
-  type PContravariant' (a :--> b) = (PCovariant' a, PContravariant' b)
-  type PVariant' (a :--> b) = (PVariant' a, PVariant' b)
+instance PlutusType (a #-> b) where
+  type PInner (a #-> b) = a #-> b
+  type PCovariant' (a #-> b) = (PContravariant' a, PCovariant' b)
+  type PContravariant' (a #-> b) = (PCovariant' a, PContravariant' b)
+  type PVariant' (a #-> b) = (PVariant' a, PVariant' b)
   pcon' (PLam f) = plam' f
   pmatch' f g = plet f \f' -> g (PLam (f' #))
 

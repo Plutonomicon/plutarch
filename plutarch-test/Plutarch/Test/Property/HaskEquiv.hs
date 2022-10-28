@@ -73,7 +73,7 @@ type family LamArgs f :: [Type] where
 -- For lambda terms generate the first argument and delegate.
 instance
   (Show ha, Marshal ha pa, HaskEquiv e t hb pb hbArgs, LamArgs hb ~ hbArgs) =>
-  HaskEquiv e t (ha -> hb) (pa :--> pb) (ha ': hbArgs)
+  HaskEquiv e t (ha -> hb) (pa #-> pb) (ha ': hbArgs)
   where
   haskEquiv hf pf (a :* as) = do
     x <- forAll a

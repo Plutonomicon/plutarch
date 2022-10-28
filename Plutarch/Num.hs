@@ -7,36 +7,36 @@ import Plutarch.Internal (
   Term,
   punsafeCoerce,
   (#),
-  (:-->),
+  (#->),
  )
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PlutusType (PInner)
 import Plutarch.Unsafe (punsafeDowncast)
 
 class PNum (a :: PType) where
-  (#+) :: Term s a -> Term s a -> Term s a
+  (#+)PPlutus' s => Term s a -> Term s a -> Term s a
   default (#+) :: PNum (PInner a) => Term s a -> Term s a -> Term s a
   x #+ y = punsafeDowncast $ pto x #+ pto y
 
-  (#-) :: Term s a -> Term s a -> Term s a
+  (#-)PPlutus' s => Term s a -> Term s a -> Term s a
   default (#-) :: PNum (PInner a) => Term s a -> Term s a -> Term s a
   x #- y = punsafeDowncast $ pto x #- pto y
 
-  (#*) :: Term s a -> Term s a -> Term s a
+  (#*)PPlutus' s => Term s a -> Term s a -> Term s a
   default (#*) :: PNum (PInner a) => Term s a -> Term s a -> Term s a
   x #* y = punsafeDowncast $ pto x #* pto y
 
-  pnegate :: Term s (a :--> a)
-  default pnegate :: PNum (PInner a) => Term s (a :--> a)
-  pnegate = punsafeCoerce (pnegate :: Term s (PInner a :--> PInner a))
+  pnegatePPlutus' s => Term s (a #-> a)
+  default pnegate :: PNum (PInner a) => Term s (a #-> a)
+  pnegate = punsafeCoerce (pnegatePPlutus' s => Term s (PInner a #-> PInner a))
 
-  pabs :: Term s (a :--> a)
-  default pabs :: PNum (PInner a) => Term s (a :--> a)
-  pabs = punsafeCoerce (pabs :: Term s (PInner a :--> PInner a))
+  pabsPPlutus' s => Term s (a #-> a)
+  default pabs :: PNum (PInner a) => Term s (a #-> a)
+  pabs = punsafeCoerce (pabsPPlutus' s => Term s (PInner a #-> PInner a))
 
-  psignum :: Term s (a :--> a)
-  default psignum :: PNum (PInner a) => Term s (a :--> a)
-  psignum = punsafeCoerce (psignum :: Term s (PInner a :--> PInner a))
+  psignumPPlutus' s => Term s (a #-> a)
+  default psignum :: PNum (PInner a) => Term s (a #-> a)
+  psignum = punsafeCoerce (psignumPPlutus' s => Term s (PInner a #-> PInner a))
 
   pfromInteger :: Integer -> Term s a
   default pfromInteger :: PNum (PInner a) => Integer -> Term s a

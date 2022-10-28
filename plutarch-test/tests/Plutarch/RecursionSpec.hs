@@ -22,22 +22,22 @@ spec = do
           "double" @| iterateN # 10 # double # 1
             @== pconstant @PInteger 1024
 
-succ :: Term s (PInteger :--> PInteger)
+succPPlutus' s => Term s (PInteger #-> PInteger)
 succ = plam $ \x -> x + 1
 
-double :: Term s (PInteger :--> PInteger)
+doublePPlutus' s => Term s (PInteger #-> PInteger)
 double = plam $ \x -> x * 2
 
 {- |
   Example of a simple recursive function with pfix
 -}
-iterateN :: Term s (PInteger :--> (a :--> a) :--> a :--> a)
+iterateNPPlutus' s => Term s (PInteger #-> (a #-> a) #-> a #-> a)
 iterateN = pfix # plam iterateN'
   where
     iterateN' ::
-      Term s (PInteger :--> (a :--> a) :--> a :--> a) ->
+      Term s (PInteger #-> (a #-> a) #-> a #-> a) ->
       Term s PInteger ->
-      Term s (a :--> a) ->
+      Term s (a #-> a) ->
       Term s a ->
       Term s a
 

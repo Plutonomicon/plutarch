@@ -811,6 +811,22 @@
       }
     },
     "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1655983783,
+        "narHash": "sha256-0h1FzkYWei24IdKNpCX93onkF/FMiXQG8SdEbTc0r8A=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6141b8932a5cf376fe18fcd368cecd9ad946cb68",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
       "flake": false,
       "locked": {
         "lastModified": 1645493675,
@@ -861,6 +877,20 @@
         "type": "github"
       }
     },
+    "plutarch-core": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "narHash": "sha256-K7Puu1J+l9BXCsz1/MUQosFkg1PtVMqdXy29B+7+m9k=",
+        "path": "/home/baldur/code/plutarch-core",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/baldur/code/plutarch-core",
+        "type": "path"
+      }
+    },
     "plutus": {
       "inputs": {
         "cardano-repo-tool": "cardano-repo-tool",
@@ -869,7 +899,7 @@
         "haskell-language-server": "haskell-language-server_2",
         "haskell-nix": "haskell-nix_2",
         "iohk-nix": "iohk-nix_2",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_6",
         "pre-commit-hooks-nix": "pre-commit-hooks-nix",
         "sphinxcontrib-haddock": "sphinxcontrib-haddock"
       },
@@ -936,6 +966,7 @@
           "nixpkgs-unstable"
         ],
         "nixpkgs-latest": "nixpkgs-latest",
+        "plutarch-core": "plutarch-core",
         "plutus": "plutus",
         "protolude": "protolude",
         "secp256k1-haskell": "secp256k1-haskell"

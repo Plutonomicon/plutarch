@@ -17,7 +17,7 @@ import Plutarch.Internal (
   plam',
   punsafeConstantInternal,
   tracingMode,
-  (:-->),
+  (#->),
   pattern DoTracingAndBinds,
  )
 import Plutarch.Internal.PrettyStack (prettyStack)
@@ -30,10 +30,10 @@ import qualified PlutusCore as PLC
  The 'PLamN' constraint allows
  currying to work as expected for any number of arguments.
 
- > id :: Term s (a :--> a)
+ > idPPlutus' s => Term s (a #-> a)
  > id = plam (\x -> x)
 
- > const :: Term s (a :--> b :-> a)
+ > constPPlutus' s => Term s (a #-> b :-> a)
  > const = plam (\x y -> x)
 -}
 
@@ -41,7 +41,7 @@ mkstring :: Text.Text -> Term s a
 mkstring x = punsafeConstantInternal $ PLC.someValue @Text.Text @PLC.DefaultUni x
 
 class PLamN (a :: Type) (b :: PType) (s :: S) | a -> b, s b -> a where
-  plam :: forall c. HasCallStack => (Term s c -> a) -> Term s (c :--> b)
+  plam :: forall c. HasCallStack => (Term s c -> a) -> Term s (c #-> b)
 
 instance {-# OVERLAPPABLE #-} (a' ~ Term s a) => PLamN a' a s where
   plam f =
@@ -50,8 +50,8 @@ instance {-# OVERLAPPABLE #-} (a' ~ Term s a) => PLamN a' a s where
           DoTracingAndBinds -> ptrace (mkstring $ prettyStack "L" cs) $ f x
           _ -> f x
 
-instance (a' ~ Term s a, PLamN b' b s) => PLamN (a' -> b') (a :--> b) s where
+instance (a' ~ Term s a, PLamN b' b s) => PLamN (a' -> b') (a #-> b) s where
   plam f = withFrozenCallStack $ plam' $ \x -> plam (f x)
 
-pinl :: Term s a -> (Term s a -> Term s b) -> Term s b
+pinlPPlutus' s => Term s a -> (Term s a -> Term s b) -> Term s b
 pinl v f = f v

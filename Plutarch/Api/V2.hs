@@ -78,13 +78,13 @@ import qualified PlutusLedgerApi.V1.Value as Plutus
 -- On-chain Script Types
 
 -- | a Validator Term
-type PValidator = PData :--> PData :--> Contexts.PScriptContext :--> POpaque
+type PValidator = PData #-> PData #-> Contexts.PScriptContext #-> POpaque
 
 -- | a MintingPolicy Term
-type PMintingPolicy = PData :--> Contexts.PScriptContext :--> POpaque
+type PMintingPolicy = PData #-> Contexts.PScriptContext #-> POpaque
 
 -- | a StakeValidator Term
-type PStakeValidator = PData :--> Contexts.PScriptContext :--> POpaque
+type PStakeValidator = PData #-> Contexts.PScriptContext #-> POpaque
 
 -- | Compile a Validator
 mkValidator :: HasCallStack => Config -> ClosedTerm PValidator -> Plutus.Validator

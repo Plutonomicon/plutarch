@@ -16,7 +16,7 @@ import Generics.SOP (
   cpara_SList,
   para_SList,
  )
-import Plutarch.Internal (PDelayed, PType, Term, pdelay, pforce, plam', plet, (#), (:-->))
+import Plutarch.Internal (PDelayed, PType, Term, pdelay, pforce, plam', plet, (#), (#->))
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
 import Plutarch.Internal.PlutusType (
   DerivedPInner,
@@ -38,7 +38,7 @@ data PlutusTypeScott
 type ScottFn' :: [PType] -> PType -> PType
 type family ScottFn' xs r where
   ScottFn' '[] r = r
-  ScottFn' (x ': xs) r = x :--> ScottFn' xs r
+  ScottFn' (x ': xs) r = x #-> ScottFn' xs r
 
 type ScottFn :: [PType] -> PType -> PType
 type family ScottFn xs r where
@@ -70,12 +70,12 @@ newtype PLamL s b as = PLamL {unPLamL :: (NP (Term s) as -> Term s b) -> Term s 
 plamL :: SListI as => (NP (Term s) as -> Term s b) -> Term s (ScottFn as b)
 plamL = unPLamL $ case_SList (PLamL \f -> pdelay $ f Nil) (PLamL plamL')
 
-newtype PAppL' s r as = PAppL' {unPAppL' :: Term s (ScottFn' as r) -> NP (Term s) as -> Term s r}
+newtype PAppL' s r as = PAppL' {unPAppL'PPlutus' s => Term s (ScottFn' as r) -> NP (Term s) as -> Term s r}
 
 pappL' :: SListI as => Term s (ScottFn' as c) -> NP (Term s) as -> Term s c
 pappL' = unPAppL' $ para_SList (PAppL' \f Nil -> f) (\(PAppL' prev) -> PAppL' \f (x :* xs) -> prev (f # x) xs)
 
-newtype PAppL s r as = PAppL {unPAppL :: Term s (ScottFn as r) -> NP (Term s) as -> Term s r}
+newtype PAppL s r as = PAppL {unPAppLPPlutus' s => Term s (ScottFn as r) -> NP (Term s) as -> Term s r}
 
 pappL :: SListI as => Term s (ScottFn as r) -> NP (Term s) as -> Term s r
 pappL = unPAppL $ case_SList (PAppL \f Nil -> pforce f) (PAppL pappL')
@@ -114,7 +114,7 @@ gpcon ::
   Term s (PScottEncoded as r)
 gpcon fields' =
   pletL fields' \(SOP fields) ->
-    pcon $ PScottEncoded $ plamL \args -> (gpcon' args fields :: Term s r)
+    pcon $ PScottEncoded $ plamL \args -> (gpcon' args fieldsPPlutus' s => Term s r)
 
 newtype GPMatch' s r as = GPMatch' {unGPMatch' :: (SOP (Term s) as -> Term s r) -> NP (Term s) (ScottList as r)}
 

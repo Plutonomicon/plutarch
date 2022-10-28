@@ -22,21 +22,21 @@ spec = do
               bench `psatisfyWithinBenchmark` Benchmark 1_000_000_000 1_000_000 100
         "uglyDouble" @| uglyDouble
 
-add1 :: Term s (PInteger :--> PInteger :--> PInteger)
+add1PPlutus' s => Term s (PInteger #-> PInteger #-> PInteger)
 add1 = plam $ \x y -> x + y + 1
 
-add1Hoisted :: Term s (PInteger :--> PInteger :--> PInteger)
+add1HoistedPPlutus' s => Term s (PInteger #-> PInteger #-> PInteger)
 add1Hoisted = phoistAcyclic $ plam $ \x y -> x + y + 1
 
-example1 :: Term s PInteger
+example1PPlutus' s => Term s PInteger
 example1 = add1Hoisted # 12 # 32 + add1Hoisted # 5 # 4
 
-example2 :: Term s (PEither PInteger PInteger :--> PInteger)
+example2PPlutus' s => Term s (PEither PInteger PInteger #-> PInteger)
 example2 = plam $ \x -> pmatch x $ \case
   PLeft n -> n + 1
   PRight n -> n - 1
 
-fib :: Term s (PInteger :--> PInteger)
+fibPPlutus' s => Term s (PInteger #-> PInteger)
 fib = phoistAcyclic $
   pfix #$ plam $ \self n ->
     pif
@@ -47,5 +47,5 @@ fib = phoistAcyclic $
         1
         $ self # (n - 1) + self # (n - 2)
 
-uglyDouble :: Term s (PInteger :--> PInteger)
+uglyDoublePPlutus' s => Term s (PInteger #-> PInteger)
 uglyDouble = plam $ \n -> plet n $ \n1 -> plet n1 $ \n2 -> n2 + n2

@@ -12,18 +12,18 @@ import Plutarch.Internal (
   tracingMode,
   (#),
   pattern NoTracing,
-  type (:-->),
+  type (#->),
  )
 import {-# SOURCE #-} Plutarch.String (PString)
 
 import Plutarch.Unsafe (punsafeBuiltin)
 import qualified PlutusCore as PLC
 
-ptrace' :: Term s (PString :--> a :--> a)
+ptrace'PPlutus' s => Term s (PString #-> a #-> a)
 ptrace' = phoistAcyclic $ pforce $ punsafeBuiltin PLC.Trace
 
 -- | Trace the given message before evaluating the argument.
-ptrace :: Term s PString -> Term s a -> Term s a
+ptracePPlutus' s => Term s PString -> Term s a -> Term s a
 ptrace s a = pgetConfig \c -> case tracingMode c of
   NoTracing -> a
   _ -> pforce $ ptrace' # s # pdelay a

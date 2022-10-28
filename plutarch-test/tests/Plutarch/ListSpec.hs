@@ -106,7 +106,7 @@ prop_pfindEquiv =
     (pfind # peven)
     (genList genInteger :* Nil)
   where
-    peven :: Term s (PInteger :--> PBool)
+    pevenPPlutus' s => Term s (PInteger #-> PBool)
     peven = plam $ \n -> pmod # n # 2 #== 0
 
 -- plutarch level elemAt mirrors haskell level elemAt

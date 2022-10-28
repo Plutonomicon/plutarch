@@ -20,7 +20,7 @@ import Plutarch.Builtin (PAsData, PIsData, pfromData)
     :: forall (s :: S). Term s (PAsData (PInteger @{S}))
 -}
 class PFromDataable (a :: PType) (b :: PType) | b -> a, a -> b where
-  pmaybeFromAsData :: Term s (PAsData a) -> Term s b
+  pmaybeFromAsDataPPlutus' s => Term s (PAsData a) -> Term s b
 
 instance {-# OVERLAPPABLE #-} PFromDataable a (PAsData a) where
   pmaybeFromAsData = id

@@ -39,10 +39,10 @@ import Plutarch.Test.Property.Marshal (Marshal)
 prop_leftInverse ::
   forall e p p' h.
   ( LamArgs h ~ '[]
-  , HaskEquiv e 'TotalFun (h -> h) (p :--> p) '[h]
+  , HaskEquiv e 'TotalFun (h -> h) (p #-> p) '[h]
   ) =>
-  ClosedTerm (p' :--> p) ->
-  ClosedTerm (p :--> p') ->
+  ClosedTerm (p' #-> p) ->
+  ClosedTerm (p #-> p') ->
   Gen h ->
   Property
 prop_leftInverse l r arg =

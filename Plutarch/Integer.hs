@@ -10,7 +10,7 @@ import Plutarch.Internal (
   Term,
   phoistAcyclic,
   (#),
-  (:-->),
+  (#->),
  )
 import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Other (POpaque, pto)
@@ -38,17 +38,17 @@ instance PUnsafeLiftDecl PInteger where type PLifted PInteger = Integer
 deriving via (DerivePConstantDirect Integer PInteger) instance PConstantDecl Integer
 
 class PIntegral a where
-  pdiv :: Term s (a :--> a :--> a)
-  default pdiv :: PIntegral (PInner a) => Term s (a :--> a :--> a)
+  pdivPPlutus' s => Term s (a #-> a #-> a)
+  default pdiv :: PIntegral (PInner a) => Term s (a #-> a #-> a)
   pdiv = phoistAcyclic $ plam $ \x y -> punsafeDowncast $ pdiv # pto x # pto y
-  pmod :: Term s (a :--> a :--> a)
-  default pmod :: PIntegral (PInner a) => Term s (a :--> a :--> a)
+  pmodPPlutus' s => Term s (a #-> a #-> a)
+  default pmod :: PIntegral (PInner a) => Term s (a #-> a #-> a)
   pmod = phoistAcyclic $ plam $ \x y -> punsafeDowncast $ pmod # pto x # pto y
-  pquot :: Term s (a :--> a :--> a)
-  default pquot :: PIntegral (PInner a) => Term s (a :--> a :--> a)
+  pquotPPlutus' s => Term s (a #-> a #-> a)
+  default pquot :: PIntegral (PInner a) => Term s (a #-> a #-> a)
   pquot = phoistAcyclic $ plam $ \x y -> punsafeDowncast $ pquot # pto x # pto y
-  prem :: Term s (a :--> a :--> a)
-  default prem :: PIntegral (PInner a) => Term s (a :--> a :--> a)
+  premPPlutus' s => Term s (a #-> a #-> a)
+  default prem :: PIntegral (PInner a) => Term s (a #-> a #-> a)
   prem = phoistAcyclic $ plam $ \x y -> punsafeDowncast $ prem # pto x # pto y
 
 instance PIntegral PInteger where

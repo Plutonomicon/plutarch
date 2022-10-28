@@ -38,7 +38,7 @@ import Plutarch.Internal (
   punsafeCoerce,
   (#),
   (#$),
-  (:-->),
+  (#->),
  )
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom)
 import Plutarch.Internal.Other (
@@ -65,11 +65,11 @@ pshow = pshow' False
 instance PShow PString where
   pshow' _ x = pshowStr # x
     where
-      pshowStr :: Term s (PString :--> PString)
+      pshowStrPPlutus' s => Term s (PString #-> PString)
       pshowStr = phoistAcyclic $
         plam $ \s ->
           "\"" <> (pdecodeUtf8 #$ pshowUtf8Bytes #$ pencodeUtf8 # s) <> "\""
-      pshowUtf8Bytes :: Term s (PByteString :--> PByteString)
+      pshowUtf8BytesPPlutus' s => Term s (PByteString #-> PByteString)
       pshowUtf8Bytes = phoistAcyclic $
         pfix #$ plam $ \self bs ->
           pelimBS # bs
@@ -90,7 +90,7 @@ instance PShow PString where
 instance PShow PBool where
   pshow' _ x = pshowBool # x
     where
-      pshowBool :: Term s (PBool :--> PString)
+      pshowBoolPPlutus' s => Term s (PBool #-> PString)
       pshowBool = phoistAcyclic $
         plam $ \x ->
           -- Delegate to Haskell's Show instance
@@ -99,7 +99,7 @@ instance PShow PBool where
 instance PShow PInteger where
   pshow' _ x = pshowInt # x
     where
-      pshowInt :: Term s (PInteger :--> PString)
+      pshowIntPPlutus' s => Term s (PInteger #-> PString)
       pshowInt = phoistAcyclic $
         pfix #$ plam $ \self n ->
           let sign = pif (n #< 0) "-" ""
@@ -113,7 +113,7 @@ instance PShow PInteger where
                               prefix <> pshowDigit # r
                           )
                    )
-      pshowDigit :: Term s (PInteger :--> PString)
+      pshowDigitPPlutus' s => Term s (PInteger #-> PString)
       pshowDigit = phoistAcyclic $
         plam $ \digit ->
           pcase perror digit $
@@ -123,24 +123,24 @@ instance PShow PInteger where
 instance PShow PByteString where
   pshow' _ x = showByteString # x
     where
-      showByteString :: Term s (PByteString :--> PString)
+      showByteStringPPlutus' s => Term s (PByteString #-> PString)
       showByteString = phoistAcyclic $
         plam $ \bs ->
           "0x" <> showByteString' # bs
-      showByteString' :: Term s (PByteString :--> PString)
+      showByteString'PPlutus' s => Term s (PByteString #-> PString)
       showByteString' = phoistAcyclic $
         pfix #$ plam $ \self bs ->
           pelimBS # bs
             # (pconstant @PString "")
             #$ plam
             $ \x xs -> showByte # x <> self # xs
-      showByte :: Term s (PInteger :--> PString)
+      showBytePPlutus' s => Term s (PInteger #-> PString)
       showByte = phoistAcyclic $
         plam $ \n ->
           plet (pquot # n # 16) $ \a ->
             plet (prem # n # 16) $ \b ->
               showNibble # a <> showNibble # b
-      showNibble :: Term s (PInteger :--> PString)
+      showNibblePPlutus' s => Term s (PInteger #-> PString)
       showNibble = phoistAcyclic $
         plam $ \n ->
           pcase perror n $
@@ -154,9 +154,9 @@ pelimBS ::
   Term
     s
     ( PByteString
-        :--> a -- If bytestring is empty
-        :--> (PInteger :--> PByteString :--> a) -- If bytestring is non-empty
-        :--> a
+        #-> a -- If bytestring is empty
+        #-> (PInteger #-> PByteString #-> a) -- If bytestring is non-empty
+        #-> a
     )
 pelimBS = phoistAcyclic $
   plam $ \bs z f ->
@@ -176,7 +176,7 @@ gpshow ::
   forall a s.
   (PGeneric a, PlutusType a, All2 PShow (PCode a)) =>
   Bool ->
-  Term s (a :--> PString)
+  Term s (a #-> PString)
 gpshow wrap =
   let constructorNames :: [ConstructorName] =
         hcollapse $ hmap (K . constructorName) $ constructorInfo $ gdatatypeInfo (Proxy @(a s))
@@ -217,5 +217,5 @@ productGroup wrap sep = \case
 {- | Causes an error where the input is shown in the message.
  Works for all types.
 -}
-pshowAndErr :: Term s a -> Term s b
+pshowAndErrPPlutus' s => Term s a -> Term s b
 pshowAndErr x = punsafeCoerce $ pindexBS # (punsafeCoerce $ pif' # (punsafeCoerce x) # x # x) # 0

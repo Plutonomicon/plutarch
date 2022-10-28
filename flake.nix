@@ -28,6 +28,9 @@
   inputs.secp256k1-haskell.url = "github:haskoin/secp256k1-haskell";
   inputs.secp256k1-haskell.flake = false;
 
+  # inputs.plutarch-core.url = "github:Plutonomicon/plutarch-core";
+  inputs.plutarch-core.url = "path:/home/baldur/code/plutarch-core";
+
   # https://github.com/protolude/protolude/pull/133#issuecomment-1112150422 RC not uploaded to hackage yet...
   inputs.protolude.url = "github:protolude/protolude";
   inputs.protolude.flake = false;
@@ -38,7 +41,7 @@
 
   inputs.emanote.url = "github:srid/emanote/master";
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-latest, iohk-nix, haskell-nix, hercules-ci-effects, haskell-nix-extra-hackage, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-latest, iohk-nix, haskell-nix, hercules-ci-effects, plutarch-core, haskell-nix-extra-hackage, ... }:
     let
       supportedSystems = nixpkgs-latest.lib.systems.flakeExposed;
 
@@ -152,6 +155,7 @@
           "${inputs.protolude}"
           "${inputs.cardano-prelude}/cardano-prelude"
           "${inputs.cardano-crypto}"
+          "${inputs.plutarch-core}"
           "${inputs.cardano-base}/binary"
           "${inputs.cardano-base}/cardano-crypto-class"
           "${inputs.plutus}/plutus-core"

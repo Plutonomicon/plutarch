@@ -114,13 +114,13 @@ import GHC.Stack (HasCallStack)
 -- On-chain Script Types
 
 -- | a Validator Term
-type PValidator = PData :--> PData :--> PScriptContext :--> POpaque
+type PValidator = PData #-> PData #-> PScriptContext #-> POpaque
 
 -- | a MintingPolicy Term
-type PMintingPolicy = PData :--> PScriptContext :--> POpaque
+type PMintingPolicy = PData #-> PScriptContext #-> POpaque
 
 -- | a StakeValidator Term
-type PStakeValidator = PData :--> PScriptContext :--> POpaque
+type PStakeValidator = PData #-> PScriptContext #-> POpaque
 
 -- | Compile a Validator
 mkValidator :: HasCallStack => Config -> ClosedTerm PValidator -> Plutus.Validator

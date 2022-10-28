@@ -158,7 +158,7 @@ spec = do
       "pconstant-pcon-rel"
         @| ( let valHash = "01"
                  addr = Address (ScriptCredential $ fromString valHash) Nothing
-                 pscriptCredential :: Term s PCredential
+                 pscriptCredentialPPlutus' s => Term s PCredential
                  pscriptCredential =
                   pcon $
                     PScriptCredential $

@@ -1,6 +1,6 @@
 module Plutarch.Prelude (
   -- * eDSL types and functions.
-  (:-->),
+  (#->),
   PDelayed,
   Term,
   ClosedTerm,

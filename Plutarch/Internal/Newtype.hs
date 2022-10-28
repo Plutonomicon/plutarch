@@ -27,8 +27,12 @@ instance PlutusTypeStrat PlutusTypeNewtype where
     SOP.SOP (SOP.S x) -> case x of {}
   derivedPMatch x f = f (gpto $ SOP.SOP $ SOP.Z $ x SOP.:* SOP.Nil)
 
-type family GetPNewtype' (a :: [[PType]]) :: PType where
+type
+  GetPNewtype' :: [[PType]] -> PType
+type family 
+  GetPNewtype' a where
   GetPNewtype' '[ '[a]] = a
 
-type family GetPNewtype (a :: PType) :: PType where
-  GetPNewtype a = GetPNewtype' (PCode a)
+type GetPNewtype :: PType -> PType
+type GetPNewtype a = GetPNewtype' (PCode a)
+

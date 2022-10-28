@@ -51,7 +51,7 @@ _pmaybeLT ::
     Term s (PDataRecord rec) ->
     Term s PBool
   ) ->
-  Term s (PMaybeData a :--> PMaybeData a :--> PBool)
+  Term s (PMaybeData a #-> PMaybeData a #-> PBool)
 _pmaybeLT whenBothNothing ltF = phoistAcyclic $
   plam $ \x y -> unTermCont $ do
     a <- tcont . plet $ pasConstr #$ pforgetData $ pdata x

@@ -34,7 +34,7 @@ import Plutarch.Prelude
       pure $ ptraceError "not a spending tx"
   @
 -}
-pgetContinuingOutputs :: Term s (PBuiltinList PTxInInfo :--> PBuiltinList PTxOut :--> PTxOutRef :--> PBuiltinList PTxOut)
+pgetContinuingOutputsPPlutus' s => Term s (PBuiltinList PTxInInfo #-> PBuiltinList PTxOut #-> PTxOutRef #-> PBuiltinList PTxOut)
 pgetContinuingOutputs = phoistAcyclic $
   plam $ \inputs outputs outRef ->
     pmatch (pfindOwnInput # inputs # outRef) $ \case
@@ -45,7 +45,7 @@ pgetContinuingOutputs = phoistAcyclic $
       PNothing ->
         ptraceError "can't get any continuing outputs"
   where
-    matches :: Term s (PAddress :--> PTxOut :--> PBool)
+    matchesPPlutus' s => Term s (PAddress #-> PTxOut #-> PBool)
     matches = phoistAcyclic $
       plam $ \adr txOut ->
         adr #== pfield @"address" # txOut
@@ -67,12 +67,12 @@ pgetContinuingOutputs = phoistAcyclic $
       pure $ ptraceError "not a spending tx"
   @
 -}
-pfindOwnInput :: Term s (PBuiltinList PTxInInfo :--> PTxOutRef :--> PMaybe PTxInInfo)
+pfindOwnInputPPlutus' s => Term s (PBuiltinList PTxInInfo #-> PTxOutRef #-> PMaybe PTxInInfo)
 pfindOwnInput = phoistAcyclic $
   plam $ \inputs outRef ->
     pfind # (matches # outRef) # inputs
   where
-    matches :: Term s (PTxOutRef :--> PTxInInfo :--> PBool)
+    matchesPPlutus' s => Term s (PTxOutRef #-> PTxInInfo #-> PBool)
     matches = phoistAcyclic $
       plam $ \outref txininfo ->
         outref #== pfield @"outRef" # txininfo
@@ -88,7 +88,7 @@ pfindOwnInput = phoistAcyclic $
   pparseDatum @MyType # datumHash #$ pfield @"datums" # txinfo
   @
 -}
-pparseDatum :: forall a s. PTryFrom PData (PAsData a) => Term s (PDatumHash :--> PBuiltinList (PAsData (PTuple PDatumHash PDatum)) :--> PMaybe (PAsData a))
+pparseDatum :: forall a s. PTryFrom PData (PAsData a) => Term s (PDatumHash #-> PBuiltinList (PAsData (PTuple PDatumHash PDatum)) #-> PMaybe (PAsData a))
 pparseDatum = phoistAcyclic $
   plam $ \dh datums ->
     pmatch (pfind # (matches # dh) # datums) $ \case
@@ -99,7 +99,7 @@ pparseDatum = phoistAcyclic $
             datum = pto $ pfromData $ pfield @"_1" # pfromData datumTuple
          in pcon $ PJust $ ptryFromData datum
   where
-    matches :: forall k v s. (PEq k, PIsData k) => Term s (k :--> PAsData (PTuple k v) :--> PBool)
+    matches :: forall k v s. (PEq k, PIsData k) => Term s (k #-> PAsData (PTuple k v) #-> PBool)
     matches = phoistAcyclic $
       plam $ \a ab ->
         a #== pfield @"_0" # ab

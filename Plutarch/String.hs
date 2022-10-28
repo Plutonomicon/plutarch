@@ -10,7 +10,7 @@ import qualified Data.Text as Text
 import GHC.Generics (Generic)
 import Plutarch.Bool (PEq, (#==))
 import Plutarch.ByteString (PByteString)
-import Plutarch.Internal (Term, (#), (:-->))
+import Plutarch.Internal (Term, (#), (#->))
 import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Other (POpaque)
 import Plutarch.Internal.PlutusType (DPTStrat, DerivePlutusType, PlutusType)
@@ -53,9 +53,9 @@ instance Monoid (Term s PString) where
   mempty = pconstant Text.empty
 
 -- | Encode a 'PString' using UTF-8.
-pencodeUtf8 :: Term s (PString :--> PByteString)
+pencodeUtf8PPlutus' s => Term s (PString #-> PByteString)
 pencodeUtf8 = punsafeBuiltin PLC.EncodeUtf8
 
 -- | Decode a 'PByteString' using UTF-8.
-pdecodeUtf8 :: Term s (PByteString :--> PString)
+pdecodeUtf8PPlutus' s => Term s (PByteString #-> PString)
 pdecodeUtf8 = punsafeBuiltin PLC.DecodeUtf8

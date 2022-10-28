@@ -14,7 +14,7 @@ Enables elegant usage of 'pmatch' and similar.
 @
   import qualified Plutarch.Monadic as P
 
-  f :: Term s (PTxInfo :--> PBuiltinList (PAsData PTxInInfo))
+  fPPlutus' s => Term s (PTxInfo #-> PBuiltinList (PAsData PTxInInfo))
   f = plam $ \x -> P.do
     PTxInfo txInfoFields <- pmatch x
     pfromData $ pdhead # txInfoFields
