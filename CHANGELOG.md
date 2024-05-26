@@ -1,5 +1,12 @@
 # Revision history for plutarch
 
+# 1.5.1 - 25-05-2024
+
+## Added
+
+* `evalTermNoEmit` and internal function used by this function. This function have identical functionality as `evalTerm` 
+  but, internally, runs CEK machine with budget and log tracing disabled.
+
 # 1.5.0 - 26-01-2024
 
 ## Changed
