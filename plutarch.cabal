@@ -90,6 +90,7 @@ library
     Plutarch.DataRepr.Internal.FromData
     Plutarch.DataRepr.Internal.HList
     Plutarch.DataRepr.Internal.HList.Utils
+    Plutarch.EasyBench
     Plutarch.Either
     Plutarch.Enum
     Plutarch.Evaluate
@@ -145,6 +146,7 @@ library
 
   build-depends:
     , aeson
+    , base16-bytestring
     , bytestring
     , constraints
     , containers
