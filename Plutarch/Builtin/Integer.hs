@@ -19,9 +19,7 @@ module Plutarch.Builtin.Integer (
 ) where
 
 import GHC.Generics (Generic)
-
--- import Plutarch.Internal.Lift (DeriveBuiltinPLiftable, PLiftable, PLifted (PLifted))
--- import Plutarch.Internal.Newtype (PlutusTypeNewtype)
+import Generics.SOP qualified as SOP
 
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.Opaque (POpaque)
@@ -34,6 +32,7 @@ import PlutusCore qualified as PLC
 -}
 newtype PInteger s = PInteger (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | Performs modulo exponentiation. More precisely, @pexpModInteger b e m@
 performs @b@ to the power of @e@, modulo @m@. The result is always

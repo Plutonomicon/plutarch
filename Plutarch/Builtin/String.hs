@@ -6,6 +6,7 @@ import Data.Kind (Type)
 import Data.String (IsString, fromString)
 import Data.Text qualified as Text
 import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Opaque (POpaque)
 import Plutarch.Internal.Term (
@@ -26,6 +27,7 @@ import PlutusCore qualified as PLC
 -- | Plutus 'BuiltinString' values
 newtype PString s = PString (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 instance IsString (Term s PString) where
   fromString = punsafeConstantInternal . PLC.someValue . Text.pack

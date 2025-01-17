@@ -24,6 +24,7 @@ module Plutarch.Builtin.BLS (
 ) where
 
 import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Integer (PInteger)
@@ -39,6 +40,7 @@ import PlutusCore.Crypto.BLS12_381.G2 qualified as BLS12_381.G2
 -}
 newtype PBuiltinBLS12_381_G1_Element s = PBuiltinBLS12_381_G1_Element (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | Add two points on the BLS12-381 G1 curve.
 
@@ -99,6 +101,7 @@ pbls12_381_G1_compressed_generator = punsafeConstantInternal $ PLC.someValue BLS
 -- | @since 1.9.0
 newtype PBuiltinBLS12_381_G2_Element s = PBuiltinBLS12_381_G2_Element (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | Add two points on the BLS12-381 G2 curve.
 
@@ -162,6 +165,7 @@ pbls12_381_G2_compressed_generator = punsafeConstantInternal $ PLC.someValue BLS
 -}
 newtype PBuiltinBLS12_381_MlResult s = PBuiltinBLS12_381_MlResult (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | Perform a Miller loop operation on a G1 and G2 element.
 

@@ -28,6 +28,8 @@ module Plutarch.Internal.PlutusType (
   PVariant'',
   PCovariant'',
   PContravariant'',
+  DeriveAsNewtype (DeriveAsNewtype, unDeriveAsNewtype),
+  DeriveAsFake (DeriveAsFake),
 ) where
 
 import Plutarch.Builtin.BLS (
@@ -59,9 +61,18 @@ import Plutarch.Builtin.Unit (PUnit (PUnit), punit)
 
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
+import GHC.Exts (Any)
 import GHC.TypeLits (ErrorMessage (ShowType, Text, (:<>:)), TypeError)
-import Generics.SOP (All2)
+import Generics.SOP (
+  All2,
+  Code,
+  I (I),
+  NP (Nil, (:*)),
+  NS (Z),
+  SOP (SOP),
+ )
 import Generics.SOP qualified as SOP
+import Generics.SOP.Constraint (Head)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
 import {-# SOURCE #-} Plutarch.Internal.IsData (
   PIsData,
@@ -190,8 +201,70 @@ type family GetPNewtype (a :: PType) :: PType where
 
 --------------------------------------------------------------------------------
 
-instance DerivePlutusType PInteger where type DPTStrat _ = PlutusTypeNewtype
-deriving anyclass instance PlutusType PInteger
+-- | @since WIP
+newtype DeriveAsNewtype (a :: S -> Type) s = DeriveAsNewtype
+  { unDeriveAsNewtype :: a s
+  -- ^ @since WIP
+  }
+
+-- Helpers
+
+type family UnTermSingle (x :: Type) :: S -> Type where
+  UnTermSingle (Term _ a) = a
+
+class (SOP.Generic (a s), Code (a s) ~ '[ '[Term s pt]]) => H s a pt
+instance (SOP.Generic (a s), Code (a s) ~ '[ '[Term s pt]]) => H s a pt
+
+instance
+  forall (a :: S -> Type) (pt :: S -> Type).
+  ( pt ~ UnTermSingle (Head (Head (Code (a Any))))
+  , forall s. H s a pt
+  ) =>
+  PlutusType (DeriveAsNewtype a)
+  where
+  type PInner (DeriveAsNewtype a) = UnTermSingle (Head (Head (Code (a Any))))
+  type PCovariant' (DeriveAsNewtype a) = PCovariant' a
+  type PContravariant' (DeriveAsNewtype a) = PContravariant' a
+  type PVariant' (DeriveAsNewtype a) = PVariant' a
+
+  -- This breaks without type signature because of (s :: S) needs to be bind.
+  pcon' :: forall s. DeriveAsNewtype a s -> Term s (PInner (DeriveAsNewtype a))
+  pcon' (DeriveAsNewtype x) =
+    case SOP.unZ $ SOP.unSOP (SOP.from x :: SOP I '[ '[Term s pt]]) of
+      (I x) :* Nil -> x :: Term s pt
+
+  pmatch' :: forall s b. Term s (PInner (DeriveAsNewtype a)) -> (DeriveAsNewtype a s -> Term s b) -> Term s b
+  pmatch' x f =
+    f (DeriveAsNewtype $ SOP.to ((SOP $ Z $ I x :* Nil) :: SOP I '[ '[Term s pt]]))
+
+--------------------------------------------------------------------------------
+
+class Bottom
+
+{- |
+This is a cursed derivation strategy that will give you @PlutusType@ with no questions asked. This is occasionally helpful
+for deriving @PlutusType@ for another derivation strategy wrapper whose target instance requires @PlutusType@ as superclass.
+
+See @PLiftable@
+-}
+newtype DeriveAsFake (a :: S -> Type) (s :: S) = DeriveAsFake (a s)
+
+instance PlutusType (DeriveAsFake a) where
+  type PInner (DeriveAsFake a) = TypeError ('ShowType a ':<>: 'Text " derived PlutusType with DeriveAsFake. This type is not meant to be used as PlutusType.")
+  type PCovariant' (DeriveAsFake a) = Bottom
+  type PContravariant' (DeriveAsFake a) = Bottom
+  type PVariant' (DeriveAsFake a) = Bottom
+
+  -- This breaks without type signature because of (s :: S) needs to be bind.
+  pcon' :: forall s. DeriveAsFake a s -> Term s (PInner (DeriveAsFake a))
+  pcon' _ = error "Attepted to use a type derived with DeriveAsFake"
+
+  pmatch' :: forall s b. Term s (PInner (DeriveAsFake a)) -> (DeriveAsFake a s -> Term s b) -> Term s b
+  pmatch' _ _ = error "Attepted to use a type derived with DeriveAsFake"
+
+--------------------------------------------------------------------------------
+
+deriving via (DeriveAsNewtype PInteger) instance PlutusType PInteger
 
 instance PlutusType POpaque where
   type PInner POpaque = POpaque
@@ -253,17 +326,17 @@ instance PIsData a => PlutusType (PAsData a) where
   pcon' (PAsData t) = punsafeCoerce $ pdata t
   pmatch' t f = f (PAsData $ pfromData $ punsafeCoerce t)
 
-instance DerivePlutusType PByteString where type DPTStrat _ = PlutusTypeNewtype
-deriving anyclass instance PlutusType PByteString
+-- | @since WIP
+deriving via (DeriveAsNewtype PByteString) instance PlutusType PByteString
 
-instance DerivePlutusType PByte where type DPTStrat _ = PlutusTypeNewtype
-deriving anyclass instance PlutusType PByte
+-- | @since WIP
+deriving via (DeriveAsNewtype PByte) instance PlutusType PByte
 
-instance DerivePlutusType PLogicOpSemantics where type DPTStrat _ = PlutusTypeNewtype
-deriving anyclass instance PlutusType PLogicOpSemantics
+-- | @since WIP
+deriving via (DeriveAsNewtype PLogicOpSemantics) instance PlutusType PLogicOpSemantics
 
-instance DerivePlutusType PString where type DPTStrat _ = PlutusTypeNewtype
-deriving anyclass instance PlutusType PString
+-- | @since WIP
+deriving via (DeriveAsNewtype PString) instance PlutusType PString
 
 instance PlutusType PUnit where
   type PInner PUnit = PUnit
@@ -271,29 +344,13 @@ instance PlutusType PUnit where
   pmatch' x f = plet x \_ -> f PUnit
 
 -- | @since WIP
-instance DerivePlutusType PBuiltinBLS12_381_G1_Element where
-  type DPTStrat _ = PlutusTypeNewtype
+deriving via (DeriveAsNewtype PBuiltinBLS12_381_G1_Element) instance PlutusType PBuiltinBLS12_381_G1_Element
 
 -- | @since WIP
-deriving anyclass instance PlutusType PBuiltinBLS12_381_G1_Element
+deriving via (DeriveAsNewtype PBuiltinBLS12_381_G2_Element) instance PlutusType PBuiltinBLS12_381_G2_Element
 
 -- | @since WIP
-instance DerivePlutusType PBuiltinBLS12_381_G2_Element where
-  type DPTStrat _ = PlutusTypeNewtype
+deriving via (DeriveAsNewtype PBuiltinBLS12_381_MlResult) instance PlutusType PBuiltinBLS12_381_MlResult
 
 -- | @since WIP
-deriving anyclass instance PlutusType PBuiltinBLS12_381_G2_Element
-
--- | @since WIP
-instance DerivePlutusType PBuiltinBLS12_381_MlResult where
-  type DPTStrat _ = PlutusTypeNewtype
-
--- | @since WIP
-deriving anyclass instance PlutusType PBuiltinBLS12_381_MlResult
-
--- | @since WIP
-instance DerivePlutusType PEndianness where
-  type DPTStrat _ = PlutusTypeNewtype
-
--- | @since WIP
-deriving anyclass instance PlutusType PEndianness
+deriving via (DeriveAsNewtype PEndianness) instance PlutusType PEndianness
