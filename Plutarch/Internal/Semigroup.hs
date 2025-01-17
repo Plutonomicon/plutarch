@@ -71,7 +71,7 @@ import Plutarch.Internal.Term (
   (#),
   (#$),
  )
-import Plutarch.Repr.Newtype
+import Plutarch.Repr.Newtype (DeriveAsNewtype (DeriveAsNewtype))
 import Plutarch.Unsafe (punsafeDowncast)
 import PlutusCore qualified as PLC
 

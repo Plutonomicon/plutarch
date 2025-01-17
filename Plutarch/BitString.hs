@@ -16,6 +16,7 @@ module Plutarch.BitString (
 
 import Data.ByteString (ByteString)
 import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Data (PBuiltinList)
@@ -26,13 +27,11 @@ import Plutarch.Internal.Lift (
   PLiftable,
   PLifted (PLifted),
  )
-import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Numeric (pzero)
 import Plutarch.Internal.Ord (POrd ((#<)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
 import Plutarch.Internal.PlutusType (
-  DerivePlutusType (DPTStrat),
   PlutusType,
   pcon,
  )
@@ -47,6 +46,7 @@ import Plutarch.Internal.Term (
   (:-->),
  )
 import Plutarch.Maybe (PMaybe (PJust, PNothing))
+import Plutarch.Repr.Newtype (DeriveAsNewtype (DeriveAsNewtype))
 import PlutusCore qualified as PLC
 
 {- | A wrapper around 'PByteString' for CIP-122 and CIP-123 bitwise operations.
@@ -67,7 +67,7 @@ newtype PBitString (s :: S) = PBitString (Term s PByteString)
     )
   deriving anyclass
     ( -- | @since WIP
-      PlutusType
+      SOP.Generic
     , -- | @since WIP
       PEq
     , -- | @since WIP
@@ -77,10 +77,11 @@ newtype PBitString (s :: S) = PBitString (Term s PByteString)
     , -- | @since WIP
       PMonoid
     )
-
--- | @since WIP
-instance DerivePlutusType PBitString where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving
+    ( -- | @since WIP
+      PlutusType
+    )
+    via (DeriveAsNewtype PBitString)
 
 -- | @since WIP
 deriving via
