@@ -33,6 +33,7 @@ module Plutarch.Internal.Numeric (
 import Data.Coerce (coerce)
 import Data.Kind (Type)
 import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Numeric.Natural (Natural)
 import Plutarch.Builtin.BLS (
   PBuiltinBLS12_381_G1_Element,
@@ -76,12 +77,11 @@ import Plutarch.Internal.Lift (
   PLifted (PLifted),
   punsafeCoercePLifted,
  )
-import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Ord (POrd ((#<=)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
 import Plutarch.Internal.PlutusType (
-  DerivePlutusType (DPTStrat),
+  DeriveAsNewtype (DeriveAsNewtype),
   PlutusType (PInner),
   pcon,
  )
@@ -118,7 +118,7 @@ newtype PPositive (s :: S) = PPositive (Term s PInteger)
     )
   deriving anyclass
     ( -- | @since WIP
-      PlutusType
+      SOP.Generic
     , -- | @since WIP
       PIsData
     , -- | @since WIP
@@ -126,10 +126,11 @@ newtype PPositive (s :: S) = PPositive (Term s PInteger)
     , -- | @since WIP
       POrd
     )
-
--- | @since WIP
-instance DerivePlutusType PPositive where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving
+    ( -- | @since WIP
+      PlutusType
+    )
+    via (DeriveAsNewtype PPositive)
 
 -- | @since WIP
 deriving via
@@ -173,7 +174,7 @@ newtype PNatural (s :: S) = PNatural (Term s PInteger)
     )
   deriving anyclass
     ( -- | @since WIP
-      PlutusType
+      SOP.Generic
     , -- | @since WIP
       PIsData
     , -- | @since WIP
@@ -181,10 +182,7 @@ newtype PNatural (s :: S) = PNatural (Term s PInteger)
     , -- | @since WIP
       POrd
     )
-
--- | @since WIP
-instance DerivePlutusType PNatural where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving (PlutusType) via DeriveAsNewtype PNatural
 
 -- | @since WIP
 instance PLiftable PNatural where

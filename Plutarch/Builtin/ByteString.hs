@@ -31,6 +31,7 @@ import Data.Char (toLower)
 import Data.Word (Word8)
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
+import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Bool (PBool, pfalse, ptrue)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque)
@@ -50,6 +51,7 @@ import PlutusCore qualified as PLC
 -- | Plutus 'BuiltinByteString'
 newtype PByteString s = PByteString (Term s POpaque)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | A Plutarch-level representation of bytes.
 
@@ -67,6 +69,7 @@ newtype PByte (s :: S) = PByte (Term s POpaque)
     ( -- | @since WIP
       Generic
     )
+  deriving anyclass (SOP.Generic)
 
 instance Semigroup (Term s PByteString) where
   x <> y = punsafeBuiltin PLC.AppendByteString # x # y
@@ -86,6 +89,7 @@ newtype PEndianness (s :: S) = PEndianness (Term s PBool)
     ( -- | @since WIP
       Generic
     )
+  deriving anyclass (SOP.Generic)
 
 {- | Indicates the conversion should be most-significant-first.
 
@@ -124,6 +128,7 @@ for more details on this.
 -}
 newtype PLogicOpSemantics (s :: S) = PLogicOpSemantics (Term s PBool)
   deriving stock (Generic)
+  deriving anyclass (SOP.Generic)
 
 {- | Perform the logical AND of two 'PByteString's, as per
 [CIP-122](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0122#bitwiselogicaland).

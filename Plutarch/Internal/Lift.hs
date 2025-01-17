@@ -61,10 +61,10 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Word (Word8)
 import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Plutarch.Internal.Evaluate (EvalError, evalScriptHuge)
 import {-# SOURCE #-} Plutarch.Internal.IsData (PIsData)
-import Plutarch.Internal.Newtype (PlutusTypeNewtype)
-import Plutarch.Internal.PlutusType (DPTStrat, DerivePlutusType, PlutusType)
+import Plutarch.Internal.PlutusType (DeriveAsFake (DeriveAsFake), PlutusType)
 import Plutarch.Internal.Subtype (PSubtype)
 import Plutarch.Internal.Term (
   Config (Tracing),
@@ -271,11 +271,8 @@ of a @Data@ encoding).
 newtype DeriveBuiltinPLiftable (a :: S -> Type) (h :: Type) (s :: S)
   = DeriveBuiltinPLiftable (a s)
   deriving stock (Generic)
-  deriving anyclass (PlutusType)
-
--- | @since WIP
-instance DerivePlutusType (DeriveBuiltinPLiftable a h) where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving anyclass (SOP.Generic)
+  deriving (PlutusType) via (DeriveAsFake (DeriveBuiltinPLiftable a h))
 
 -- | @since WIP
 instance
@@ -308,11 +305,8 @@ the Plutus default universe.
 newtype DeriveDataPLiftable (a :: S -> Type) (h :: Type) (s :: S)
   = DeriveDataPLiftable (a s)
   deriving stock (Generic)
-  deriving anyclass (PlutusType)
-
--- | @since WIP
-instance DerivePlutusType (DeriveDataPLiftable a h) where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving anyclass (SOP.Generic)
+  deriving (PlutusType) via (DeriveAsFake (DeriveDataPLiftable a h))
 
 -- | @since WIP
 instance
@@ -347,11 +341,8 @@ Haskell representation as @h@
 newtype DeriveNewtypePLiftable (wrapper :: S -> Type) (inner :: S -> Type) (h :: Type) (s :: S)
   = DeriveNewtypePLiftable (wrapper s)
   deriving stock (Generic)
-  deriving anyclass (PlutusType)
-
--- | @since WIP
-instance DerivePlutusType (DeriveNewtypePLiftable w i h) where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving anyclass (SOP.Generic)
+  deriving (PlutusType) via (DeriveAsFake (DeriveNewtypePLiftable wrapper inner h))
 
 -- | @since WIP
 instance (PLiftable inner, Coercible (AsHaskell inner) h) => PLiftable (DeriveNewtypePLiftable wrapper inner h) where
