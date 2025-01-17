@@ -301,14 +301,14 @@ checkPLiftableLaws ::
   ) =>
   [TestTree]
 checkPLiftableLaws =
-  [ testProperty "fromPlutarch . toPlutarch = Right"
+  [ testProperty "plutToRepr . reprToPlut = Right"
       . forAllShrinkShow arbitrary shrink prettyShow
       $ \(x :: AsHaskell a) ->
-        fromPlutarch @a (toPlutarch @a x) === Right x
-  , testProperty "fromPlutarchRepr . toPlutarchRepr = Just"
+        (reprToHask @a <$> plutToRepr @a (reprToPlut (haskToRepr @a x))) === (reprToHask @a <$> Right (haskToRepr @a x))
+  , testProperty "reprToHask . haskToRepr = Right"
       . forAllShrinkShow arbitrary shrink prettyShow
       $ \(x :: AsHaskell a) ->
-        fromPlutarchRepr @a (toPlutarchRepr @a x) === Just x
+        reprToHask @a (haskToRepr @a x) === Right x
   , testProperty "plift . pconstant = id" . forAllShrinkShow arbitrary shrink prettyShow $ \(x :: AsHaskell a) ->
       plift (pconstant @a x) `prettyEquals` x
   ]

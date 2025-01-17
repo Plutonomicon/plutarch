@@ -84,7 +84,7 @@ instance DerivePlutusType PBitString where
 
 -- | @since WIP
 deriving via
-  DeriveNewtypePLiftable PBitString PByteString ByteString
+  DeriveNewtypePLiftable PBitString ByteString
   instance
     PLiftable PBitString
 

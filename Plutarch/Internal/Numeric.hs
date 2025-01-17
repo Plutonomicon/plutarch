@@ -17,6 +17,8 @@ module Plutarch.Internal.Numeric (
   PIntegralDomain (..),
 
   -- * Functions
+  positiveToInteger,
+  toPositiveAbs,
   ptryPositive,
   ppositive,
   ptryNatural,
@@ -65,13 +67,14 @@ import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.IsData (PIsData)
 import Plutarch.Internal.Lift (
   DeriveNewtypePLiftable,
+  LiftError (OtherLiftError),
   PLiftable (
     AsHaskell,
     PlutusRepr,
-    fromPlutarch,
-    fromPlutarchRepr,
-    toPlutarch,
-    toPlutarchRepr
+    haskToRepr,
+    plutToRepr,
+    reprToHask,
+    reprToPlut
   ),
   PLifted (PLifted),
   punsafeCoercePLifted,
@@ -133,7 +136,7 @@ instance DerivePlutusType PPositive where
 
 -- | @since WIP
 deriving via
-  DeriveNewtypePLiftable PPositive PInteger Positive
+  DeriveNewtypePLiftable PPositive Positive
   instance
     PLiftable PPositive
 
@@ -165,6 +168,21 @@ instance Function Positive where
   {-# INLINEABLE function #-}
   function = functionMap @Integer coerce coerce
 
+{- | Converts negative 'Integer's into their absolute values, positive
+'Integer's into their 'Positive' equivalents. Errors on 0.
+
+@since WIP
+-}
+toPositiveAbs :: Integer -> Positive
+toPositiveAbs i = UnsafeMkPositive $ case signum i of
+  (-1) -> abs i
+  0 -> error "toPositiveAbs: called with zero"
+  _ -> i
+
+-- | @since WIP
+positiveToInteger :: Positive -> Integer
+positiveToInteger = getPositive
+
 -- | @since WIP
 newtype PNatural (s :: S) = PNatural (Term s PInteger)
   deriving stock
@@ -190,17 +208,16 @@ instance DerivePlutusType PNatural where
 instance PLiftable PNatural where
   type AsHaskell PNatural = Natural
   type PlutusRepr PNatural = Integer
-  {-# INLINEABLE toPlutarchRepr #-}
-  toPlutarchRepr = fromIntegral
-  {-# INLINEABLE toPlutarch #-}
-  toPlutarch = punsafeCoercePLifted . toPlutarch @PInteger . fromIntegral
-  {-# INLINEABLE fromPlutarchRepr #-}
-  fromPlutarchRepr x =
-    if x < 0
-      then Nothing
-      else Just . fromIntegral $ x
-  {-# INLINEABLE fromPlutarch #-}
-  fromPlutarch t = fromIntegral <$> fromPlutarch @PInteger (punsafeCoercePLifted t)
+  {-# INLINEABLE haskToRepr #-}
+  haskToRepr = fromIntegral
+  {-# INLINEABLE reprToHask #-}
+  reprToHask i = case signum i of
+    (-1) -> Left $ OtherLiftError "Negative input"
+    _ -> Right . fromIntegral $ i
+  {-# INLINEABLE reprToPlut #-}
+  reprToPlut = punsafeCoercePLifted . reprToPlut @PInteger . fromIntegral
+  {-# INLINEABLE plutToRepr #-}
+  plutToRepr t = plutToRepr @PInteger (punsafeCoercePLifted t)
 
 {- | The addition operation, and the notion of scaling by a positive.
 

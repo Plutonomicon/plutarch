@@ -15,26 +15,26 @@ module Plutarch.Rational (
 import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Bool (PBool, pcond, pif)
-import Plutarch.Builtin.Data (PAsData, PBuiltinList, PData, ppairDataBuiltin)
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PData)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
-import Plutarch.Internal.IsData (pdata)
 import Plutarch.Internal.Lift (
   PLiftable (
     AsHaskell,
     PlutusRepr,
-    fromPlutarch,
-    fromPlutarchRepr,
-    toPlutarch,
-    toPlutarchRepr
+    haskToRepr,
+    plutToRepr,
+    reprToHask,
+    reprToPlut
   ),
   PLiftedClosed,
-  fromPlutarchReprClosed,
-  getPLifted,
+  getPLiftedClosed,
   mkPLifted,
+  mkPLiftedClosed,
   pconstant,
-  toPlutarchReprClosed,
+  pliftedFromClosed,
+  pliftedToClosed,
  )
 import Plutarch.Internal.ListLike (phead, pnil, ptail)
 import Plutarch.Internal.Numeric (
@@ -48,8 +48,10 @@ import Plutarch.Internal.Numeric (
   PRing (pfromInteger),
   pdiv,
   pmod,
+  positiveToInteger,
   pquot,
   ptryPositive,
+  toPositiveAbs,
  )
 import Plutarch.Internal.Ord (
   POrd ((#<), (#<=)),
@@ -103,24 +105,30 @@ deriving via (DeriveAsSOPRec PRational) instance PlutusType PRational
 instance PLiftable PRational where
   type AsHaskell PRational = PlutusTx.Rational
   type PlutusRepr PRational = PLiftedClosed PRational
-  {-# INLINEABLE toPlutarchRepr #-}
-  toPlutarchRepr = toPlutarchReprClosed
-  {-# INLINEABLE toPlutarch #-}
-  toPlutarch r =
+  {-# INLINEABLE haskToRepr #-}
+  haskToRepr r =
     let n = PlutusTx.numerator r
         d = PlutusTx.denominator r
-     in mkPLifted . pcon $
-          if
-            | n == 0 -> PRational pzero pone
-            | d < 0 -> PRational (pconstant . negate $ n) . punsafeCoerce . pconstant @PInteger . negate $ d
-            | otherwise -> PRational (pconstant n) . punsafeCoerce . pconstant @PInteger $ d
-  {-# INLINEABLE fromPlutarchRepr #-}
-  fromPlutarchRepr = fromPlutarchReprClosed
-  {-# INLINEABLE fromPlutarch #-}
-  fromPlutarch t = do
-    (n, d) <- fromPlutarch $ mkPLifted $ pmatch (getPLifted t) $ \(PRational n' d') ->
-      ppairDataBuiltin # pdata n' # pdata (pto d')
-    pure . PlutusTx.unsafeRatio n $ d
+     in case signum n of
+          0 -> mkPLiftedClosed $ pcon $ PRational 0 pone
+          _ ->
+            let dabs = toPositiveAbs d
+             in case signum d of
+                  (-1) ->
+                    mkPLiftedClosed $ pcon . PRational (pconstant . negate $ n) . pconstant $ dabs
+                  _ ->
+                    mkPLiftedClosed $ pcon . PRational (pconstant n) . pconstant $ dabs
+  {-# INLINEABLE reprToHask #-}
+  reprToHask x = do
+    n <- plutToRepr $ mkPLifted (pnumerator # getPLiftedClosed x)
+    dr :: PlutusRepr PPositive <- plutToRepr $ mkPLifted (pdenominator # getPLiftedClosed x)
+    d <- reprToHask @PPositive dr
+    pure . PlutusTx.unsafeRatio n . positiveToInteger $ d
+
+  {-# INLINEABLE plutToRepr #-}
+  plutToRepr = Right . pliftedToClosed
+  {-# INLINEABLE reprToPlut #-}
+  reprToPlut = pliftedFromClosed
 
 instance PEq PRational where
   {-# INLINEABLE (#==) #-}

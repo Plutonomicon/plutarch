@@ -238,7 +238,6 @@ instance DerivePlutusType (PValue keys amounts) where
 deriving via
   DeriveNewtypePLiftable
     (PValue 'AssocMap.Unsorted 'NoGuarantees)
-    (AssocMap.PMap 'AssocMap.Unsorted PCurrencySymbol (AssocMap.PMap 'AssocMap.Unsorted PTokenName PInteger))
     Plutus.Value
   instance
     PLiftable (PValue 'AssocMap.Unsorted 'NoGuarantees)

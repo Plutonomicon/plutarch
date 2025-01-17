@@ -32,17 +32,18 @@ import Plutarch.Internal.Lift (
   PLiftable (
     AsHaskell,
     PlutusRepr,
-    fromPlutarch,
-    fromPlutarchRepr,
-    toPlutarch,
-    toPlutarchRepr
+    haskToRepr,
+    plutToRepr,
+    reprToHask,
+    reprToPlut
   ),
   PLiftedClosed,
-  fromPlutarchReprClosed,
-  getPLifted,
+  getPLiftedClosed,
   mkPLifted,
+  mkPLiftedClosed,
   pconstant,
-  toPlutarchReprClosed,
+  pliftedFromClosed,
+  pliftedToClosed,
  )
 import Plutarch.Internal.PLam (plam)
 import Plutarch.Internal.PlutusType (
@@ -82,23 +83,23 @@ deriving via DeriveAsSOPStruct (PMaybe a) instance PlutusType (PMaybe a)
 instance PLiftable a => PLiftable (PMaybe a) where
   type AsHaskell (PMaybe a) = Maybe (AsHaskell a)
   type PlutusRepr (PMaybe a) = PLiftedClosed (PMaybe a)
-
-  {-# INLINEABLE toPlutarchRepr #-}
-  toPlutarchRepr = toPlutarchReprClosed
-
-  {-# INLINEABLE toPlutarch #-}
-  toPlutarch (Just a) = mkPLifted $ pcon $ PJust $ pconstant @a a
-  toPlutarch Nothing = mkPLifted $ pcon PNothing
-
-  {-# INLINEABLE fromPlutarchRepr #-}
-  fromPlutarchRepr = fromPlutarchReprClosed
-
-  {-# INLINEABLE fromPlutarch #-}
-  fromPlutarch t = do
-    isJust' <- fromPlutarch $ mkPLifted $ pisJust # getPLifted t
-    if isJust'
-      then fmap Just $ fromPlutarch $ mkPLifted $ pfromJust # getPLifted t
-      else Right Nothing
+  {-# INLINEABLE haskToRepr #-}
+  haskToRepr = \case
+    Nothing -> mkPLiftedClosed $ pcon PNothing
+    Just x -> mkPLiftedClosed $ pcon $ PJust (pconstant @a x)
+  {-# INLINEABLE reprToHask #-}
+  reprToHask x = do
+    isJust :: Bool <- plutToRepr $ mkPLifted (pisJust # getPLiftedClosed x)
+    if isJust
+      then do
+        vr :: PlutusRepr a <- plutToRepr $ mkPLifted (pfromJust # getPLiftedClosed x)
+        vh :: AsHaskell a <- reprToHask @a vr
+        pure $ Just vh
+      else pure Nothing
+  {-# INLINEABLE reprToPlut #-}
+  reprToPlut = pliftedFromClosed
+  {-# INLINEABLE plutToRepr #-}
+  plutToRepr = Right . pliftedToClosed
 
 -- | Extracts the element out of a 'PJust' and throws an error if its argument is 'PNothing'.
 pfromJust ::

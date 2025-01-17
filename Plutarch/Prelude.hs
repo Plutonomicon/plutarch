@@ -112,8 +112,8 @@ module Plutarch.Prelude (
   DeriveDataPLiftable,
   DeriveNewtypePLiftable,
   PLifted (..),
-  fromPlutarchUni,
-  toPlutarchUni,
+  reprToPlutUni,
+  plutToReprUni,
   pconstant,
   plift,
 

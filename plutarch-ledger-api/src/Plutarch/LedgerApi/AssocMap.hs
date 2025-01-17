@@ -81,8 +81,8 @@ import Data.Bifunctor (bimap)
 import Data.Foldable (foldl')
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-import Data.Traversable (forM)
 import GHC.Generics (Generic)
+import Plutarch.Internal.Lift (LiftError (CouldNotDecodeData))
 import Plutarch.Internal.Term (punsafeBuiltin)
 import Plutarch.Internal.Witness (witness)
 import Plutarch.LedgerApi.Utils (
@@ -133,21 +133,22 @@ instance
   where
   type AsHaskell (PMap 'Unsorted k v) = PlutusMap.Map (AsHaskell k) (AsHaskell v)
   type PlutusRepr (PMap 'Unsorted k v) = [(Plutus.Data, Plutus.Data)]
-
-  {-# INLINEABLE toPlutarchRepr #-}
-  toPlutarchRepr = map (bimap Plutus.toData Plutus.toData) . PlutusMap.toList
-
-  {-# INLINEABLE toPlutarch #-}
-  toPlutarch = toPlutarchUni
-
-  {-# INLINEABLE fromPlutarchRepr #-}
-  fromPlutarchRepr lst = fmap PlutusMap.unsafeFromList $ forM lst $ \(kd, vd) -> do
-    k <- Plutus.fromData kd
-    v <- Plutus.fromData vd
-    pure (k, v)
-
-  {-# INLINEABLE fromPlutarch #-}
-  fromPlutarch = fromPlutarchUni
+  {-# INLINEABLE haskToRepr #-}
+  haskToRepr = fmap (bimap Plutus.toData Plutus.toData) . PlutusMap.toList
+  {-# INLINEABLE reprToHask #-}
+  reprToHask x =
+    PlutusMap.unsafeFromList
+      <$> traverse
+        ( \(k, v) ->
+            (,)
+              <$> (maybe (Left CouldNotDecodeData) Right . Plutus.fromData) k
+              <*> (maybe (Left CouldNotDecodeData) Right . Plutus.fromData) v
+        )
+        x
+  {-# INLINEABLE reprToPlut #-}
+  reprToPlut = reprToPlutUni
+  {-# INLINEABLE plutToRepr #-}
+  plutToRepr = plutToReprUni
 
 -- | @since 2.0.0
 instance PIsData (PMap keysort k v) where

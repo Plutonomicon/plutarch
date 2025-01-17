@@ -71,7 +71,7 @@ import {-# SOURCE #-} Plutarch.Internal.IsData (
 import {-# SOURCE #-} Plutarch.Internal.Lift (
   PlutusRepr,
   getPLifted,
-  unsafeToUni,
+  unsafeHaskToUni,
  )
 import Plutarch.Internal.Quantification (PFix (PFix), PForall (PForall), PSome (PSome))
 import Plutarch.Internal.Term (PType, S, Term, pdelay, pforce, plam', plet, punsafeCoerce, (#), (:-->) (PLam))
@@ -232,7 +232,7 @@ instance PLC.Contains PLC.DefaultUni (PlutusRepr a) => PlutusType (PBuiltinList 
   type PContravariant' (PBuiltinList a) = PContravariant' a
   type PVariant' (PBuiltinList a) = PVariant' a
   pcon' (PCons x xs) = pconsBuiltin # x # xs
-  pcon' PNil = getPLifted $ unsafeToUni @[PlutusRepr a] []
+  pcon' PNil = getPLifted $ unsafeHaskToUni @[PlutusRepr a] []
   pmatch' xs' f = plet xs' $ \xs ->
     pforce $
       pchooseListBuiltin
