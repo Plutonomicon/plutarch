@@ -61,7 +61,7 @@ common lang
     -Wno-unrecognised-warning-flags -Wno-unrecognised-pragmas
     -Wno-operator-whitespace -Wno-unticked-promoted-constructors
     -fprint-equality-relations -fprint-explicit-kinds
-    -fprint-explicit-foralls
+    -fprint-explicit-foralls -Wno-missing-export-lists
 
 library
   import:          lang
@@ -123,6 +123,7 @@ test-suite tests
     Plutarch.Test.Suite.Plutarch.Tracing
     Plutarch.Test.Suite.Plutarch.TryFrom
     Plutarch.Test.Suite.Plutarch.Unit
+    Plutarch.Test.Suite.Plutarch.Unroll
     Plutarch.Test.Suite.Plutarch.Uplc
     Plutarch.Test.Suite.PlutarchLedgerApi.AssocMap
     Plutarch.Test.Suite.PlutarchLedgerApi.Regressions
@@ -157,7 +158,8 @@ benchmark bench
   import:         lang
   type:           exitcode-stdio-1.0
   main-is:        Bench.hs
-  hs-source-dirs: bench
+  hs-source-dirs: bench test
+  other-modules:  Plutarch.Test.Suite.Plutarch.Unroll
   build-depends:
     , plutarch
     , plutarch-ledger-api

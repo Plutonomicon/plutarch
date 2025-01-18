@@ -141,6 +141,7 @@ library
     Plutarch.String
     Plutarch.TermCont
     Plutarch.Trace
+    Plutarch.Unroll
     Plutarch.Unsafe
 
   build-depends:

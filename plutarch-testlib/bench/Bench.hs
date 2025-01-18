@@ -17,6 +17,8 @@ import Plutarch.Test.Bench (
  )
 import Test.Tasty (TestTree, testGroup)
 
+import Plutarch.Test.Suite.Plutarch.Unroll (unrollBenches)
+
 main :: IO ()
 main =
   defaultMain $
@@ -25,6 +27,7 @@ main =
       [ testGroup "Maybe" maybeBenches
       , testGroup "Exponentiation" expBenches
       , testGroup "Tracing" tracingBenches
+      , testGroup "Unroll" unrollBenches
       ]
 
 -- Suites

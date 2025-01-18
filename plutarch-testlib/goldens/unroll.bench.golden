@@ -1,0 +1,14 @@
+applied short list.punrollUnbound {"exBudgetCPU":3504419,"exBudgetMemory":11662,"scriptSizeBytes":476}
+applied short list.punrollUnboundWhole {"exBudgetCPU":3728419,"exBudgetMemory":13062,"scriptSizeBytes":454}
+applied short list.punrollBound {"exBudgetCPU":2438379,"exBudgetMemory":8152,"scriptSizeBytes":309}
+applied short list.punrollBoundFailing {"exBudgetCPU":2438379,"exBudgetMemory":8152,"scriptSizeBytes":302}
+applied short list.no unroll {"exBudgetCPU":4576419,"exBudgetMemory":18362,"scriptSizeBytes":60}
+applied long list.punrollUnbound {"exBudgetCPU":28207694,"exBudgetMemory":99272,"scriptSizeBytes":555}
+applied long list.punrollUnboundWhole {"exBudgetCPU":25711694,"exBudgetMemory":83672,"scriptSizeBytes":493}
+applied long list.punrollBound {"exBudgetCPU":8293240,"exBudgetMemory":26380,"scriptSizeBytes":387}
+applied long list.no unroll {"exBudgetCPU":32991694,"exBudgetMemory":129172,"scriptSizeBytes":100}
+unapplied.punrollUnbound {"exBudgetCPU":160100,"exBudgetMemory":1100,"scriptSizeBytes":463}
+unapplied.punrollUnboundWhole {"exBudgetCPU":352100,"exBudgetMemory":2300,"scriptSizeBytes":444}
+unapplied.punrollBound {"exBudgetCPU":160100,"exBudgetMemory":1100,"scriptSizeBytes":296}
+unapplied.punrollBoundFailing {"exBudgetCPU":160100,"exBudgetMemory":1100,"scriptSizeBytes":289}
+unapplied.no unroll {"exBudgetCPU":208100,"exBudgetMemory":1400,"scriptSizeBytes":50}

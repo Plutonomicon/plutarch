@@ -15,7 +15,7 @@
 * `pexpectJustC` to `Plutarch.TermCont` (originally from `plutarch-extra`)
 * `PCountable` and `PEnumerable` type classes, as well as instances
 * `PByte` type as a limited Plutarch-level equivalent to `Word8`
-* `PLogicSemantics`, and construction functions, to help use of logical 
+* `PLogicSemantics`, and construction functions, to help use of logical
    `PByteString` operations
 * `pandBS`, `porBS`, `pxorBS`, `pcomplementBS` mirroring CIP-122 operations
 * `pzeroesBS`, `ponesBS`, `preplicateBS`, as wrappers for CIP-122's
@@ -44,6 +44,8 @@
 * Support for SoP encoding of data
 * `PSemigroup` and `PMonoid`, as improved Plutarch versions of `Semigroup` and
   `Monoid`
+* Unrolling utilities--`punrollBound`, `punrollUnbound`, and `punrollUnboundWhole`--is added to `Plutarch.Unroll`
+* `evalTerm'` is added to `Plutarch.Evaluate`
 
 ## Changed
 
@@ -57,7 +59,7 @@
 * `PEq` type class definition is now in `Plutarch.Internal.Eq`
 * `PPartialOrd` and `POrd` type class definitions are now in
   `Plutarch.Internal.Ord`
-* `pif`, `pif'`, `pand`, `pand'`, `por`, `por'`, `pnot`, `#&&`, `#||` are 
+* `pif`, `pif'`, `pand`, `pand'`, `por`, `por'`, `pnot`, `#&&`, `#||` are
    now in `Plutarch.Builtin.Bool`
 * `Term s PRational` is now `Fractional` directly, instead of by way of
   `PFractional`
@@ -149,7 +151,7 @@
 
 * `ptrace`, `ptraceShowId`, `ptraceError`, `ptraceIfTrue` and `ptraceIfFalse`
   are now synonyms of `ptraceInfo` (and similar), and also deprecated.
-* `Config` now includes a `LogLevel` as well as a `TracingMode`. 
+* `Config` now includes a `LogLevel` as well as a `TracingMode`.
 * `Config` now has pattern synonyms to make it look like a sum type with two
   arms: `NoTracing` which indicates that we do not trace, and `Tracing` which
   contains a `TracingMode` and a `LogLevel`.

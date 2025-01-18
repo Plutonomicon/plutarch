@@ -7,6 +7,7 @@ module Plutarch.Evaluate (
   E.evalScriptUnlimited,
   E.EvalError,
   evalTerm,
+  evalTerm',
   unsafeEvalTerm,
   applyArguments,
 ) where
@@ -43,6 +44,14 @@ evalTerm config term =
     fromScript :: Script -> ClosedTerm a
     fromScript (Script script) =
       Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm script) []
+
+-- | Same as `evalTerm` but without error handling
+evalTerm' :: Config -> ClosedTerm a -> ClosedTerm a
+evalTerm' config term =
+  case evalTerm config term of
+    Right (Right t, _, _) -> t
+    Left err -> error $ "evalTerm' failed: " <> show err
+    _ -> error "evalTerm' failed"
 
 {- | Compile and evaluate a ClosedTerm
 Useful for pre-evaluating terms so that they can be used as constants in

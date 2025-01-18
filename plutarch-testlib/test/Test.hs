@@ -22,6 +22,7 @@ import Plutarch.Test.Suite.Plutarch.String qualified as String
 import Plutarch.Test.Suite.Plutarch.Tracing qualified as Tracing
 import Plutarch.Test.Suite.Plutarch.TryFrom qualified as TryFrom
 import Plutarch.Test.Suite.Plutarch.Unit qualified as Unit
+import Plutarch.Test.Suite.Plutarch.Unroll qualified as Unroll
 import Plutarch.Test.Suite.Plutarch.Uplc qualified as Uplc
 import Plutarch.Test.Suite.PlutarchLedgerApi.AssocMap qualified as AssocMap
 import Plutarch.Test.Suite.PlutarchLedgerApi.Regressions qualified as Regressions
@@ -61,6 +62,7 @@ main = do
         , Unit.tests
         , Uplc.tests
         , Semigroup.tests
+        , Unroll.tests
         ]
     , testGroup
         "PlutarchLedgerApi"

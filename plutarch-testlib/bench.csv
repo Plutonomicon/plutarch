@@ -1,0 +1,21 @@
+name,cpu,mem,size
+Benchmarks.Maybe.pmaybeToMaybeData . pmaybeDataToMaybe.non-optimized,1530663,5858,74
+Benchmarks.Maybe.pmaybeToMaybeData . pmaybeDataToMaybe.optimized,1402663,5058,66
+Benchmarks.Maybe.fmap even.PMaybeData,2117827,7861,95
+Benchmarks.Maybe.fmap even.PMaybe vs PMaybeData,600363,2702,35
+Benchmarks.Maybe.fmap fib.PMaybeData,130582957,519340,122
+Benchmarks.Maybe.fmap fib.PMaybe vs PMaybeData,132140394,532882,76
+Benchmarks.Exponentiation.linear,27984772,114282,67
+Benchmarks.Exponentiation.by squaring,7210602,26842,88
+Benchmarks.Tracing.with tracing,187598,932,73
+Benchmarks.Tracing.no tracing,16100,200,6
+"Benchmarks.Unroll.Unrolled 20 times, running 5 recursions.length, punrollUnbound",3504419,11662,476
+"Benchmarks.Unroll.Unrolled 20 times, running 5 recursions.length, punrollUnboundWhole",3728419,13062,454
+"Benchmarks.Unroll.Unrolled 20 times, running 5 recursions.length, punrollBound",2438379,8152,309
+"Benchmarks.Unroll.Unrolled 20 times, running 5 recursions.length, no unroll",4576419,18362,60
+"Benchmarks.Unroll.Unrolled 20 times, running 40 recursions.length, punrollUnbound",28207694,99272,555
+"Benchmarks.Unroll.Unrolled 20 times, running 40 recursions.length, punrollUnboundWhole",25711694,83672,493
+"Benchmarks.Unroll.Unrolled 20 times, running 40 recursions.length, punrollBound",8293240,26380,387
+"Benchmarks.Unroll.Unrolled 20 times, running 40 recursions.length, no unroll",32991694,129172,100
+Benchmarks.Unroll.punrollBound pre-computation.precompute constant values,8293240,26380,387
+Benchmarks.Unroll.punrollBound pre-computation.no precompute constant values,12557400,40420,516
